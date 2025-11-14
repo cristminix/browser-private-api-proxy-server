@@ -74,7 +74,7 @@ This will start the server with auto-reload on code changes.
 ## Architecture
 
 The server uses:
-- Express.js for REST API endpoints
+- Hono for REST API endpoints
 - ws library for WebSocket functionality
 - Both running on the same HTTP server instance (port 4001)
 - TypeScript for type safety
