@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Test</title>
+</head>
+<body>
+    <h1>WebSocket Connection Test</h1>
+    <div id="status">Connecting...</div>
+    <div id="messages"></div>
+    <button onclick="sendTestMessage()">Send Test Message</button>
+    <button onclick="sendPing()">Send Ping</button>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        const messagesDiv = document.getElementById('messages');
+
+        // Connect to WebSocket server
+        const ws = new WebSocket('ws://localhost:4001');
+
+        ws.onopen = function(event) {
+            statusDiv.innerHTML = 'Connected to WebSocket server';
+            statusDiv.style.color = 'green';
+        };
+
+        ws.onmessage = function(event) {
+            const message = JSON.parse(event.data);
+            const messageElement = document.createElement('div');
+            messageElement.innerHTML = `<strong>Received:</strong> ${JSON.stringify(message, null, 2)}`;
+            messagesDiv.appendChild(messageElement);
+        };
+
+        ws.onclose = function(event) {
+            statusDiv.innerHTML = 'Connection closed';
+            statusDiv.style.color = 'red';
+        };
+
+        ws.onerror = function(error) {
+            statusDiv.innerHTML = 'Connection error: ' + error;
+            statusDiv.style.color = 'red';
+        };
+
+        function sendTestMessage() {
+            const testMessage = {
+                type: 'api_request',
+                requestId: 'test-' + Date.now(),
+                payload: {
+                    api: 'test.api.call',
+                    data: { key: 'value' }
+                }
+            };
+
+            ws.send(JSON.stringify(testMessage));
+
+            const messageElement = document.createElement('div');
+            messageElement.innerHTML = `<strong>Sent:</strong> ${JSON.stringify(testMessage, null, 2)}`;
+            messageElement.style.color = 'blue';
+            messagesDiv.appendChild(messageElement);
+        }
+
+        function sendPing() {
+            ws.send(JSON.stringify({ type: 'ping' }));
+
+            const messageElement = document.createElement('div');
+            messageElement.innerHTML = '<strong>Sent:</strong> ping';
+            messageElement.style.color = 'blue';
+            messagesDiv.appendChild(messageElement);
+        }
+    </script>
+</body>
+</html>

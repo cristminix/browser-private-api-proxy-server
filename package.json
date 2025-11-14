@@ -1,0 +1,32 @@
+{
+  "name": "browser-private-api-proxy-server",
+  "version": "1.0.0",
+  "description": "WebSocket Server and REST API for proxying private browser APIs",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "keywords": [
+    "websocket",
+    "proxy",
+    "api",
+    "chrome-extension"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "hono": "^4.0.0",
+    "ws": "^8.14.2",
+    "cors": "^2.8.5",
+    "typescript": "^5.2.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.2",
+    "@types/ws": "^8.17.1",
+    "@hono/node-server": "^1.0.0",
+    "tsx": "^3.12.2",
+    "nodemon": "^3.0.1"
+  }
+}
