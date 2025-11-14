@@ -1,10 +1,10 @@
-import { WebSocket } from 'ws'
+import { io } from 'socket.io-client'
 
-// Create a WebSocket connection to the server
-const ws = new WebSocket('ws://localhost:4001')
+// Create a Socket.IO connection to the server
+const socket = io('http://localhost:4001')
 
-ws.on('open', () => {
-  console.log('Connected to WebSocket server')
+socket.on('connect', () => {
+  console.log('Connected to Socket.IO server')
 
   // Send a test API request
   const testMessage = {
@@ -17,23 +17,22 @@ ws.on('open', () => {
   }
 
   console.log('Sending test message:', testMessage)
-  ws.send(JSON.stringify(testMessage))
+  socket.emit('message', testMessage)
 
   // Also send a ping
   setTimeout(() => {
-    ws.send(JSON.stringify({ type: 'ping' }))
+    socket.emit('message', { type: 'ping' })
   }, 1000)
 })
 
-ws.on('message', (data) => {
-  const message = JSON.parse(data.toString())
-  console.log('Received message from server:', message)
+socket.on('message', (data) => {
+  console.log('Received message from server:', data)
 })
 
-ws.on('close', () => {
-  console.log('WebSocket connection closed')
+socket.on('disconnect', () => {
+  console.log('Socket.IO connection closed')
 })
 
-ws.on('error', (error) => {
-  console.error('WebSocket error:', error)
+socket.on('error', (error) => {
+  console.error('Socket.IO error:', error)
 })
