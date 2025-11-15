@@ -32,20 +32,21 @@ const waitForAnswer = async (socketId: any) => {
     let success = false
     let data = null
     while (!stopWatcher) {
-      console.log(iteration)
+      // console.log(iteration)
       data = await kvstore.get(`answer_${socketId}`)
       if (data) {
         success = true
         // console.log(this.phaseData)
         stopWatcher = true
       }
-      if (iteration === 500) {
-        break
-      }
-      iteration += 1
-      await delay(256)
+      // if (iteration === 500) {
+      //   break
+      // }
+      // iteration += 1
+      await delay(128)
     }
     if (success) {
+      await kvstore.delete(`answer_${socketId}`)
       resolve(data)
     } else {
       reject(null)
