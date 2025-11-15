@@ -27,7 +27,7 @@ const waitForAnswer = async (socketId: any) => {
   let iteration = 0
   setTimeout(() => {
     stopWatcher = true
-  }, 25000)
+  }, 60000)
   return new Promise(async (resolve, reject) => {
     let success = false
     let data = null
