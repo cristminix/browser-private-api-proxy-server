@@ -17,7 +17,24 @@ const main = async () => {
   console.log(text)
 
   const elapsedTime = endTime - startTime
-  console.log(`Elapsed time: ${elapsedTime.toFixed(2)} milliseconds`)
+
+  // Convert to human readable format
+  let readableTime
+  if (elapsedTime < 1) {
+    readableTime = `${elapsedTime.toFixed(3)} milliseconds`
+  } else if (elapsedTime < 1000) {
+    readableTime = `${elapsedTime.toFixed(2)} milliseconds`
+  } else {
+    const seconds = elapsedTime / 1000
+    if (seconds < 60) {
+      readableTime = `${seconds.toFixed(2)} seconds`
+    } else {
+      const minutes = seconds / 60
+      readableTime = `${minutes.toFixed(2)} minutes`
+    }
+  }
+
+  console.log(`Elapsed time: ${readableTime}`)
 }
 main().catch((e) => {
   console.error(e)
