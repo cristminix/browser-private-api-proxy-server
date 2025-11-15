@@ -22,7 +22,7 @@ app.get("/api/status", async (c: Context) => {
 })
 app.get("/api/chat", async (c: Context) => {
   const connectionIds = await getSocketConnectionIds()
-  const prompt = "What is the capital of france?"
+  const prompt = c.req.query("prompt") || "What is the capital of france"
   console.log(connectionIds)
   for (const socketId of connectionIds) {
     const appName = await getSocketAppName(socketId)
