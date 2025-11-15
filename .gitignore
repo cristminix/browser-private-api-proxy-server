@@ -30,3 +30,6 @@ coverage/
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Storage data folder
+storage/data/
