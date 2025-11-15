@@ -5,6 +5,8 @@ import type { Context } from "hono"
 import { getSocketById, setupSocketIO } from "./socket-io-config"
 import { getSocketAppName, getSocketConnectionIds } from "./db/msocket"
 import cuid from "cuid"
+import { delay } from "./utils"
+import { kvstore } from "./db/store"
 
 // Create Hono app
 const app = new Hono()
@@ -20,26 +22,55 @@ app.get("/api/status", async (c: Context) => {
     timestamp: new Date().toISOString(),
   })
 })
+const waitForAnswer = async (socketId: any) => {
+  let stopWatcher = false
+  let iteration = 0
+  setTimeout(() => {
+    stopWatcher = true
+  }, 25000)
+  return new Promise(async (resolve, reject) => {
+    let success = false
+    let data = null
+    while (!stopWatcher) {
+      console.log(iteration)
+      data = await kvstore.get(`answer_${socketId}`)
+      if (data) {
+        success = true
+        // console.log(this.phaseData)
+        stopWatcher = true
+      }
+      if (iteration === 500) {
+        break
+      }
+      iteration += 1
+      await delay(256)
+    }
+    if (success) {
+      resolve(data)
+    } else {
+      reject(null)
+    }
+  })
+}
 app.get("/api/chat", async (c: Context) => {
   const connectionIds = await getSocketConnectionIds()
   const prompt = c.req.query("prompt") || "What is the capital of france"
   console.log(connectionIds)
+  let data: any = { success: false }
   for (const socketId of connectionIds) {
     const appName = await getSocketAppName(socketId)
     if (appName === "zai-proxy") {
       const socket = getSocketById(io, socketId)
       if (socket) {
         socket.emit("chat", { payload: { prompt }, requestId: cuid() })
+        data = await waitForAnswer(socket.id)
         break
       }
     }
     console.log({ appName })
   }
-  return c.json({
-    status: "success",
-    message: "Browser Private API Proxy Server is running",
-    timestamp: new Date().toISOString(),
-  })
+  console.log(data)
+  return c.json(data)
 })
 // Additional REST API endpoint for proxying
 app.post("/api/proxy", async (c: Context) => {

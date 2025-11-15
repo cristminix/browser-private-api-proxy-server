@@ -5,6 +5,7 @@ import {
   setSocketAppName,
   updateSocketConnectionIds,
 } from "./db/msocket"
+import { kvstore } from "./db/store"
 
 // Define the type for our messages
 interface Message {
@@ -86,6 +87,10 @@ export function setupSocketIO(server: any) {
     updateSocketConnectionIds(socket.id, "in")
 
     // Handle incoming messages from client
+    socket.on("answer", (data) => {
+      console.log("received answer", data)
+      kvstore.put(`answer_${socket.id}`, data)
+    })
     socket.on("message", (data) => {
       try {
         // Socket.IO automatically parses JSON, but we'll handle both cases
