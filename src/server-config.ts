@@ -2,8 +2,9 @@ import { Hono } from "hono"
 import { cors } from "hono/cors"
 import { createServer } from "node:http"
 import type { Context } from "hono"
-import { setupSocketIO } from "./socket-io-config"
-import { getSocketConnectionIds } from "./db/msocket"
+import { getSocketById, setupSocketIO } from "./socket-io-config"
+import { getSocketAppName, getSocketConnectionIds } from "./db/msocket"
+import cuid from "cuid"
 
 // Create Hono app
 const app = new Hono()
@@ -21,7 +22,19 @@ app.get("/api/status", async (c: Context) => {
 })
 app.get("/api/chat", async (c: Context) => {
   const connectionIds = await getSocketConnectionIds()
+  const prompt = "What is the capital of france?"
   console.log(connectionIds)
+  for (const socketId of connectionIds) {
+    const appName = await getSocketAppName(socketId)
+    if (appName === "zai-proxy") {
+      const socket = getSocketById(io, socketId)
+      if (socket) {
+        socket.emit("chat", { payload: { prompt }, requestId: cuid() })
+        break
+      }
+    }
+    console.log({ appName })
+  }
   return c.json({
     status: "success",
     message: "Browser Private API Proxy Server is running",
