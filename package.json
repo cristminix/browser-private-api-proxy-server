@@ -18,7 +18,10 @@
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
+    "cuid": "^3.0.0",
     "hono": "^4.0.0",
+    "level": "^10.0.0",
+    "level-sublevel": "^6.6.5",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
     "typescript": "^5.2.2"
