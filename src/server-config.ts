@@ -3,10 +3,11 @@ import { cors } from "hono/cors"
 import { createServer } from "node:http"
 import type { Context } from "hono"
 import { setupSocketIO } from "./socket-io-config"
+import { getSocketConnectionIds } from "./db/msocket"
 
 // Create Hono app
 const app = new Hono()
-
+let io: any = null
 // Enable CORS for all routes
 app.use("/*", cors())
 
@@ -18,7 +19,15 @@ app.get("/api/status", async (c: Context) => {
     timestamp: new Date().toISOString(),
   })
 })
-
+app.get("/api/chat", async (c: Context) => {
+  const connectionIds = await getSocketConnectionIds()
+  console.log(connectionIds)
+  return c.json({
+    status: "success",
+    message: "Browser Private API Proxy Server is running",
+    timestamp: new Date().toISOString(),
+  })
+})
 // Additional REST API endpoint for proxying
 app.post("/api/proxy", async (c: Context) => {
   try {
@@ -42,7 +51,7 @@ export function createHttpServer() {
   const server = createServer()
 
   // Setup Socket.IO server
-  const io = setupSocketIO(server)
+  io = setupSocketIO(server)
 
   // Handle Hono requests through the raw HTTP server
   // Socket.IO will handle its own requests internally
