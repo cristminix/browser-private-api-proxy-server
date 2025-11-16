@@ -24,7 +24,7 @@ const main = async () => {
        * 
       */
       // console.log(jsonBody)
-      jsonBody.messages = [{ role: "system", content: "Only response result dont provide any additional text. Response in JSON format" }, ...jsonBody.messages]
+      jsonBody.messages = [{ role: "system", content: "" }, ...jsonBody.messages]
       body = JSON.stringify(jsonBody)
     }
     const response = await fetch(`https://chat.z.ai${url}`, {
