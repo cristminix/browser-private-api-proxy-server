@@ -5,7 +5,7 @@ import { makeStreamCompletion } from "./zai/makeStreamCompletion"
 // import fetch from "node:fetch"
 const main = async () => {
   // Get prompt from CLI arguments or use default
-  const prompt = process.argv[2] || "give+me+unique+answer+of+what+is+beautiful+place+on+earth+jawab+dengan+bahasa+indonesia?"
+  const prompt = process.argv[2] || "Gimme the recommended places in the world"
   // const startTime = performance.now()
   const response = await fetch(`http://127.0.0.1:4001/api/chat?prompt=${encodeURIComponent(prompt)}`)
   let data = await response.json()
