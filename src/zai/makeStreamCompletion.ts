@@ -67,6 +67,7 @@ export async function makeStreamCompletion(response: Response, sso = false, mode
       for (const line of lines) {
         // Skip empty lines or DONE markers
         if (!line.trim() || line === "data: [DONE]") {
+          // console.log({ line })
           continue
         }
 
@@ -86,6 +87,7 @@ export async function makeStreamCompletion(response: Response, sso = false, mode
             if (jsonData.type === "chat:completion") {
               const { data } = jsonData
               const { done, delta_content, usage, error } = data
+              // console.log(data)
               if (usage) {
                 calculatedUsage = usage
               }
@@ -107,7 +109,15 @@ export async function makeStreamCompletion(response: Response, sso = false, mode
                   completionId++
                 }
               }
+              if (done) {
+                completionId++
+                process.stdout.write("\n\n")
+              }
+            } else {
+              console.log(jsonData)
             }
+          } else {
+            // console.log({ line })
           }
         } catch (err) {
           // Log parsing errors but continue processing
@@ -127,14 +137,19 @@ export async function makeStreamCompletion(response: Response, sso = false, mode
 
 function convertToOpenaiTextStream(jsonData: any, model: string, completionId: number) {
   const { data: inputData } = jsonData
-  const { done, delta_content: text } = inputData
-
-  if (inputData.delta_content) {
+  const { done, delta_content: text, edit_content: textEdit } = inputData
+  // console.log({ text, textEdit })
+  let content = text
+  if (!content && textEdit) {
+    content = textEdit
+  }
+  // console.log({ content })
+  if (content) {
     return buildStreamChunk({
       model,
       index: completionId,
       finishReason: done ? "finish" : null,
-      content: text,
+      content,
     })
   }
 

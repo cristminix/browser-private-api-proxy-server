@@ -4,13 +4,29 @@ import { parseResponseBody } from "./utils"
 import { makeStreamCompletion } from "./zai/makeStreamCompletion"
 // import fetch from "node:fetch"
 const main = async () => {
-  const startTime = performance.now()
-  const response = await fetch("http://127.0.0.1:4001/api/chat?prompt=give+me+unique+answer+of+what+is+beautiful+place+on+earth+jawab+dengan+bahasa+indonesia?")
+  // Get prompt from CLI arguments or use default
+  const prompt = process.argv[2] || "give+me+unique+answer+of+what+is+beautiful+place+on+earth+jawab+dengan+bahasa+indonesia?"
+  // const startTime = performance.now()
+  const response = await fetch(`http://127.0.0.1:4001/api/chat?prompt=${encodeURIComponent(prompt)}`)
   let data = await response.json()
   console.log(data.phase)
   if (data.phase === "FETCH") {
-    const { url, body, headers } = data
-    console.log({ url, body, headers })
+    let { url, body, headers } = data
+    // console.log({ url, body, headers })
+    if (body) {
+      const jsonBody = JSON.parse(body)
+      jsonBody.features.enable_thinking = false
+      // jsonBody.features.auto_web_search = true
+      jsonBody.features.web_search = true
+      /**
+       web_search: false,
+    auto_web_search: false,
+       * 
+      */
+      // console.log(jsonBody)
+      jsonBody.messages = [{ role: "system", content: "Only response result dont provide any additional text. Response in JSON format" }, ...jsonBody.messages]
+      body = JSON.stringify(jsonBody)
+    }
     const response = await fetch(`https://chat.z.ai${url}`, {
       method: "POST",
       headers: { ...headers },
