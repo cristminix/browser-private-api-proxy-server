@@ -73,6 +73,26 @@ app.get("/api/chat", async (c: Context) => {
   console.log(data)
   return c.json(data)
 })
+app.get("/api/reload-chat", async (c: Context) => {
+  const connectionIds = await getSocketConnectionIds()
+  // const prompt = c.req.query("prompt") || "What is the capital of france"
+  // console.log(connectionIds)
+  let data: any = { success: false }
+  for (const socketId of connectionIds) {
+    const appName = await getSocketAppName(socketId)
+    if (appName === "zai-proxy") {
+      const socket = getSocketById(io, socketId)
+      if (socket) {
+        socket.emit("chat-reload", { payload: {}, requestId: cuid() })
+        // data = await waitForAnswer(socket.id)
+        break
+      }
+    }
+    // console.log({ appName })
+  }
+  // console.log(data)
+  return c.json({ success: true })
+})
 // Additional REST API endpoint for proxying
 app.post("/api/proxy", async (c: Context) => {
   try {
