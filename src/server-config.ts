@@ -7,6 +7,7 @@ import { getSocketAppName, getSocketConnectionIds } from "./db/msocket"
 import cuid from "cuid"
 import { delay } from "./utils"
 import { kvstore } from "./db/store"
+import { streamSSE } from "hono/streaming"
 
 // Create Hono app
 const app = new Hono()
@@ -62,6 +63,51 @@ const emitZaiSocket = async (eventName: string, data: any) => {
   }
   return socket
 }
+app.get("/api/fake-stream-chat", async (c: Context) => {
+  console.log("FAKE STREAM CHAT")
+  c.header("Content-Type", "text/event-stream")
+  c.header("Cache-Control", "no-cache")
+  c.header("Connection", "keep-alive")
+  return streamSSE(c, async (stream) => {
+    const chunks = [
+      { type: "chat:completion", data: { delta_content: "", phase: "answer" } },
+      { type: "chat:completion", data: { usage: { prompt_tokens: 27, completion_tokens: 1432, total_tokens: 1459, prompt_tokens_details: { cached_tokens: 0 }, words: 2838 }, phase: "other" } },
+
+      {
+        type: "chat:completion",
+        data: {
+          id: "chatcmpl-vs466ndbpsm",
+          object: "chat.completion.chunk",
+          created: 1759865334,
+          model: "GLM-4-6-API-V1",
+          choices: [{ index: 0, delta: { role: "assistant" }, finish_reason: "stop" }],
+          usage: { prompt_tokens: 27, completion_tokens: 1432, total_tokens: 1459, prompt_tokens_details: { cached_tokens: 0 }, words: 2838 },
+          phase: "answer",
+        },
+      },
+      { type: "chat:completion", data: { done: true, delta_content: "", phase: "done" } },
+      {
+        type: "chat:completion",
+        data: {
+          role: "assistant",
+          usage: { prompt_tokens: 27, completion_tokens: 1432, total_tokens: 1459, prompt_tokens_details: { cached_tokens: 0 }, words: 2838 },
+          message_id: "e965e943-57bb-4dfe-ab57-f096bba7cd42",
+          done: true,
+          edit_index: 3107,
+          edit_content: "",
+          phase: "other",
+        },
+      },
+    ]
+    for await (const item of chunks) {
+      const chunk = `data: ${JSON.stringify(item)}\n\n`
+      await stream.write(chunk)
+      await delay(256)
+    }
+    const endChunk = `\n\n`
+    await stream.write(endChunk)
+  })
+})
 app.get("/api/chat", async (c: Context) => {
   const prompt = c.req.query("prompt") || "What is the capital of france"
   let data: any = { success: false }

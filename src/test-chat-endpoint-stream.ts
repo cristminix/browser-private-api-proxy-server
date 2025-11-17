@@ -9,8 +9,9 @@ const main = async () => {
   // const startTime = performance.now()
   const response = await fetch(`http://127.0.0.1:4001/api/chat?prompt=${encodeURIComponent(prompt)}`)
   let data = await response.json()
-  console.log(data.phase)
+  // console.log(data.phase)
   if (data.phase === "FETCH") {
+    console.log("--Sending request to z.ai")
     let { url, body, headers } = data
     // console.log({ url, body, headers })
     if (body) {
@@ -24,7 +25,7 @@ const main = async () => {
        * 
       */
       // console.log(jsonBody)
-      jsonBody.messages = [{ role: "system", content: "" }, ...jsonBody.messages]
+      jsonBody.messages = [{ role: "system", content: "Jawab singkat saja" }, ...jsonBody.messages]
       body = JSON.stringify(jsonBody)
     }
     const response = await fetch(`https://chat.z.ai${url}`, {
@@ -33,7 +34,7 @@ const main = async () => {
       body,
     })
     await makeStreamCompletion(response, false, "glm")
-    await fetch("http://127.0.0.1:4001/api/reload-chat")
+    // await fetch("http://127.0.0.1:4001/api/reload-chat")
   } else {
     //   const jsonResponseStreamInput = data.body
     //   const text = parseResponseBody(jsonResponseStreamInput)
