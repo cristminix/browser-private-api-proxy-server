@@ -120,6 +120,19 @@ app.get("/api/chat", async (c: Context) => {
   console.log(data)
   return c.json(data)
 })
+app.post("/api/chat", async (c: Context) => {
+  const body = await c.req.json()
+  const prompt = body.prompt || "What is the capital of france"
+  let data: any = { success: false }
+  const socket = await emitZaiSocket("chat", { payload: { prompt }, requestId: cuid() })
+  if (socket) {
+    console.log(socket.id)
+    data = await waitForChatAnswer(socket.id)
+  }
+
+  console.log(data)
+  return c.json(data)
+})
 app.get("/api/reload-chat", async (c: Context) => {
   let data: any = { success: false }
   data.success = await emitZaiSocket("chat-reload", { payload: {}, requestId: cuid() })
