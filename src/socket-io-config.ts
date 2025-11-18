@@ -1,11 +1,8 @@
 import { Server } from "socket.io"
 import type { Socket } from "socket.io"
-import {
-  getSocketConnectionIds,
-  setSocketAppName,
-  updateSocketConnectionIds,
-} from "./db/msocket"
+import { getSocketConnectionIds, setSocketAppName, updateSocketConnectionIds } from "./db/msocket"
 import { kvstore } from "./db/store"
+import { ChatAnswerHandler } from "./ChatAnswerHandler"
 
 // Define the type for our messages
 interface Message {
@@ -72,7 +69,7 @@ const sendHeartbeats = async (io: any) => {
     })
   }, HEARTBEAT_INTERVAL)
 }
-export function setupSocketIO(server: any) {
+export function setupSocketIO(server: any, chatHandlerAnswer: ChatAnswerHandler) {
   const io = new Server(server, {
     cors: {
       origin: "*", // In production, specify your allowed origins
@@ -89,13 +86,13 @@ export function setupSocketIO(server: any) {
     // Handle incoming messages from client
     socket.on("answer", (data) => {
       console.log("received answer", data)
-      kvstore.put(`answer_${socket.id}`, data)
+      // kvstore.put(`answer_${socket.id}`, data)
+      chatHandlerAnswer.notifyAnswer(socket.id, data)
     })
     socket.on("message", (data) => {
       try {
         // Socket.IO automatically parses JSON, but we'll handle both cases
-        const message: Message =
-          typeof data === "string" ? JSON.parse(data) : data
+        const message: Message = typeof data === "string" ? JSON.parse(data) : data
         // console.log("Received Socket.IO message:", message);
 
         // Process the message based on its type
@@ -134,12 +131,7 @@ export function setupSocketIO(server: any) {
 
     // Handle client disconnect
     socket.on("disconnect", (reason) => {
-      console.log(
-        "Socket.IO client disconnected:",
-        socket.id,
-        "reason:",
-        reason
-      )
+      console.log("Socket.IO client disconnected:", socket.id, "reason:", reason)
       updateSocketConnectionIds(socket.id, "out")
     })
 

@@ -8,8 +8,10 @@ import cuid from "cuid"
 import { delay } from "./utils"
 import { kvstore } from "./db/store"
 import { streamSSE } from "hono/streaming"
+import { ChatAnswerHandler } from "./ChatAnswerHandler"
 
 // Create Hono app
+const chatHandlerAnswer = new ChatAnswerHandler()
 const app = new Hono()
 let io: any = null
 // Enable CORS for all routes
@@ -114,7 +116,7 @@ app.get("/api/chat", async (c: Context) => {
   const socket = await emitZaiSocket("chat", { payload: { prompt }, requestId: cuid() })
   if (socket) {
     console.log(socket.id)
-    data = await waitForChatAnswer(socket.id)
+    data = await chatHandlerAnswer.waitForAnswer(socket.id)
   }
 
   console.log(data)
@@ -161,7 +163,7 @@ export function createHttpServer() {
   const server = createServer()
 
   // Setup Socket.IO server
-  io = setupSocketIO(server)
+  io = setupSocketIO(server, chatHandlerAnswer)
 
   // Handle Hono requests through the raw HTTP server
   // Socket.IO will handle its own requests internally
