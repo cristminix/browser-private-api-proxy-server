@@ -2,6 +2,7 @@ import { Hono } from "hono"
 import { cors } from "hono/cors"
 import { createServer } from "node:http"
 import type { Context } from "hono"
+import type { Socket } from "socket.io"
 import { getSocketById, setupSocketIO } from "./socket-io-config"
 import { getSocketAppName, getSocketConnectionIds } from "./db/msocket"
 import cuid from "cuid"
@@ -49,21 +50,39 @@ const waitForChatAnswer = async (socketId: any) => {
     }
   })
 }
-const emitZaiSocket = async (eventName: string, data: any) => {
-  const connectionIds = await getSocketConnectionIds()
-  let socket: any = null
-  for (const socketId of connectionIds) {
-    const appName = await getSocketAppName(socketId)
-    if (appName === "zai-proxy") {
-      socket = getSocketById(io, socketId)
-      if (socket) {
-        socket.emit(eventName, data)
-        break
+const emitZaiSocket = async (eventName: string, data: unknown): Promise<Socket | null> => {
+  try {
+    const connectionIds = await getSocketConnectionIds()
+
+    if (!connectionIds || connectionIds.length === 0) {
+      console.warn("No active socket connections found")
+      return null
+    }
+
+    for (const socketId of connectionIds) {
+      try {
+        const appName = await getSocketAppName(socketId)
+
+        if (appName === "zai-proxy") {
+          const socket = getSocketById(io, socketId)
+
+          if (socket) {
+            socket.emit(eventName, data)
+            return socket
+          }
+        }
+      } catch (error) {
+        console.error(`Error processing socket ${socketId}:`, error)
+        // Continue with next socket in case of error
       }
     }
-    // console.log({ appName })
+
+    console.warn('No "zai-proxy" socket found among active connections')
+    return null
+  } catch (error) {
+    console.error("Error in emitZaiSocket:", error)
+    return null
   }
-  return socket
 }
 app.get("/api/fake-stream-chat", async (c: Context) => {
   console.log("FAKE STREAM CHAT")
