@@ -1,14 +1,6 @@
 import { ToolCall } from "./tools"
 
-export type MessageRole =
-  | "system"
-  | "developer"
-  | "user"
-  | "assistant"
-  | "function"
-  | "tool"
-  | "chatbot"
-  | "model"
+export type MessageRole = "system" | "developer" | "user" | "assistant" | "function" | "tool" | "chatbot" | "model"
 
 export interface TextBlock {
   block_type: "text"
@@ -87,4 +79,26 @@ export interface ChoiceStream {
 export interface ChatResponseStream {
   choices: ChoiceStream[]
   // Add other fields like usage if needed
+}
+
+// Type for async iterable stream responses
+export type StreamResponse = AsyncIterable<any>
+
+// Interface for completion result
+export interface CompletionResult {
+  choices: Choice[]
+  usage?: {
+    prompt_tokens: number
+    completion_tokens: number
+    total_tokens: number
+  }
+}
+
+// Interface for streaming result
+export interface StreamingResult {
+  id: string
+  object: string
+  created: number
+  model: string
+  choices: ChoiceStream[]
 }
