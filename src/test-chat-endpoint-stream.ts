@@ -1,6 +1,5 @@
 // import { io } from "socket.io-client"
 
-import { parseResponseBody } from "./utils"
 import { makeStreamCompletion } from "./zai/makeStreamCompletion"
 // import fetch from "node:fetch"
 const main = async () => {
@@ -33,7 +32,7 @@ const main = async () => {
       headers: { ...headers },
       body,
     })
-    await makeStreamCompletion(response, false, "glm")
+    await makeStreamCompletion(response, { sso: false, model: "glm" })
     // await fetch("http://127.0.0.1:4001/api/reload-chat")
   } else {
     //   const jsonResponseStreamInput = data.body

@@ -7,7 +7,6 @@ import { getSocketById, setupSocketIO } from "./socket-io-config"
 import { getSocketAppName, getSocketConnectionIds } from "./db/msocket"
 import cuid from "cuid"
 import { delay } from "./utils"
-import { kvstore } from "./db/store"
 import { streamSSE } from "hono/streaming"
 import { ChatAnswerHandler } from "./ChatAnswerHandler"
 
@@ -26,30 +25,7 @@ app.get("/api/status", async (c: Context) => {
     timestamp: new Date().toISOString(),
   })
 })
-const waitForChatAnswer = async (socketId: any) => {
-  let stopWatcher = false
-  setTimeout(() => {
-    stopWatcher = true
-  }, 60000)
-  return new Promise(async (resolve, reject) => {
-    let success = false
-    let data = null
-    while (!stopWatcher) {
-      data = await kvstore.get(`answer_${socketId}`)
-      if (data) {
-        success = true
-        stopWatcher = true
-      }
-      await delay(128)
-    }
-    if (success) {
-      await kvstore.delete(`answer_${socketId}`)
-      resolve(data)
-    } else {
-      reject(null)
-    }
-  })
-}
+
 const emitZaiSocket = async (eventName: string, data: unknown): Promise<Socket | null> => {
   try {
     const connectionIds = await getSocketConnectionIds()
@@ -97,7 +73,7 @@ app.get("/api/fake-stream-chat", async (c: Context) => {
       {
         type: "chat:completion",
         data: {
-          id: "chatcmpl-vs466ndbpsm",
+          id: "chatcmpl-" + cuid(),
           object: "chat.completion.chunk",
           created: 1759865334,
           model: "GLM-4-6-API-V1",
@@ -112,7 +88,7 @@ app.get("/api/fake-stream-chat", async (c: Context) => {
         data: {
           role: "assistant",
           usage: { prompt_tokens: 27, completion_tokens: 1432, total_tokens: 1459, prompt_tokens_details: { cached_tokens: 0 }, words: 2838 },
-          message_id: "e965e943-57bb-4dfe-ab57-f096bba7cd42",
+          message_id: cuid(),
           done: true,
           edit_index: 3107,
           edit_content: "",
@@ -148,7 +124,7 @@ app.post("/api/chat", async (c: Context) => {
   const socket = await emitZaiSocket("chat", { payload: { prompt }, requestId: cuid() })
   if (socket) {
     console.log(socket.id)
-    data = await waitForChatAnswer(socket.id)
+    data = await chatHandlerAnswer.waitForAnswer(socket.id)
   }
 
   console.log(data)
