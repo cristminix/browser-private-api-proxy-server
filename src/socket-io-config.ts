@@ -28,27 +28,19 @@ interface ApiResponse {
 function handleApiRequest(message: ApiRequest, socket: Socket) {
   // In a real implementation, this would forward the request to the target API
   // and return the result via Socket.IO
-
-  console.log("Handling API request:", message.payload)
-
+  // console.log("Handling API request:", message.payload)
   // Simulate API call response
-  setTimeout(() => {
-    const response: ApiResponse = {
-      type: "api_response",
-      requestId: message.requestId,
-      payload: {
-        status: "success",
-        data: `Processed request: ${JSON.stringify(message.payload)}`,
-      },
-    }
-
-    socket.emit("message", response)
-  }, 100)
-}
-
-// Function to get a socket by its ID
-export function getSocketById(io: any, socketId: string) {
-  return io.sockets.sockets.get(socketId) || null
+  // setTimeout(() => {
+  //   const response: ApiResponse = {
+  //     type: "api_response",
+  //     requestId: message.requestId,
+  //     payload: {
+  //       status: "success",
+  //       data: `Processed request: ${JSON.stringify(message.payload)}`,
+  //     },
+  //   }
+  //   socket.emit("message", response)
+  // }, 100)
 }
 
 // Function to setup Socket.IO server and handle connections
@@ -69,6 +61,7 @@ const sendHeartbeats = async (io: any) => {
     })
   }, HEARTBEAT_INTERVAL)
 }
+let ioInstance: any = null
 export function setupSocketIO(server: any, chatHandlerAnswer: ChatAnswerHandler) {
   const io = new Server(server, {
     cors: {
@@ -85,7 +78,7 @@ export function setupSocketIO(server: any, chatHandlerAnswer: ChatAnswerHandler)
 
     // Handle incoming messages from client
     socket.on("answer", (data) => {
-      console.log("received answer", data)
+      // console.log("received answer", data)
       // kvstore.put(`answer_${socket.id}`, data)
       chatHandlerAnswer.notifyAnswer(socket.id, data)
     })
@@ -99,7 +92,7 @@ export function setupSocketIO(server: any, chatHandlerAnswer: ChatAnswerHandler)
         switch (message.type) {
           case "api_request":
             // Handle API request from client
-            handleApiRequest(message as ApiRequest, socket)
+            // handleApiRequest(message as ApiRequest, socket)
             break
           case "ping":
             // Respond to ping
@@ -107,25 +100,25 @@ export function setupSocketIO(server: any, chatHandlerAnswer: ChatAnswerHandler)
             break
 
           case "fetch_request":
-            if (data.url) {
-              if (data.url.includes("/api/v2/chat/completions")) {
-                console.log(`Received url: ${data.url}`)
-                console.log(`Received payload: ${data.body}`)
-              }
-            }
+            // if (data.url) {
+            //   if (data.url.includes("/api/v2/chat/completions")) {
+            //     console.log(`Received url: ${data.url}`)
+            //     console.log(`Received payload: ${data.body}`)
+            //   }
+            // }
             break
           default:
-            socket.emit("message", {
-              type: "error",
-              message: `Unknown message type: ${message.type}`,
-            })
+          // socket.emit("message", {
+          //   type: "error",
+          //   message: `Unknown message type: ${message.type}`,
+          // })
         }
       } catch (error) {
         console.error("Error processing Socket.IO message:", error)
-        socket.emit("message", {
-          type: "error",
-          message: "Invalid message format",
-        })
+        // socket.emit("message", {
+        //   type: "error",
+        //   message: "Invalid message format",
+        // })
       }
     })
 
@@ -150,6 +143,8 @@ export function setupSocketIO(server: any, chatHandlerAnswer: ChatAnswerHandler)
     // Send welcome message
     socket.emit("connected")
   })
-
+  ioInstance = io
   return io
 }
+
+export { ioInstance }

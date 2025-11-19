@@ -7,13 +7,11 @@ import { type TransformedMessage } from "./transformRequestMessages"
  * @returns Content of the last user message, or null if no user message is found
  */
 
-export function getLastUserMessageContent(
-  messages: TransformedMessage[]
-): string | null {
+export function getLastUserMessageContent(messages: TransformedMessage[]): string | null {
   // Iterate through messages in reverse order to find the last user message
   for (let i = messages.length - 1; i >= 0; i--) {
     const message = messages[i]
-    if (message.role === "user") {
+    if (message && message.role === "user") {
       return message.content
     }
   }

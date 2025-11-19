@@ -1,9 +1,16 @@
 import { EventEmitter } from "events"
 class ChatAnswerHandler extends EventEmitter {
+  static instance: ChatAnswerHandler | null = null
   constructor() {
     super()
   }
+  static getInstance() {
+    if (!ChatAnswerHandler.instance) {
+      ChatAnswerHandler.instance = new ChatAnswerHandler()
+    }
 
+    return ChatAnswerHandler.instance
+  }
   waitForAnswer(socketId: string): Promise<any> {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {

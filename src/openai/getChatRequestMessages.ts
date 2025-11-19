@@ -1,0 +1,125 @@
+import { ChatCompletionRequest, ChatMessage, ContentBlock, ImageBlock, TextBlock } from "./types/chat"
+import isPromptMode from "./isPromptMode"
+async function getMessages(inputMessages: ChatMessage[], providerApi: any) {
+  // Gabungkan pesan sistem jika ada lebih dari satu
+  const systemMessages = inputMessages.filter((msg) => msg.role === "system")
+  let processedMessages = inputMessages
+
+  if (systemMessages.length > 1) {
+    const combinedSystemContent = systemMessages
+      .map((msg) => {
+        if (typeof msg.content === "string") return msg.content
+        else {
+          let systemMsgContent: string[] = []
+          if (Array.isArray(msg.content)) {
+            for (const item of msg.content) {
+              if (item.type === "text") {
+                systemMsgContent.push((item as TextBlock).text)
+              }
+            }
+            return systemMsgContent.join("\n")
+          }
+        }
+        return ""
+      })
+      .filter((content) => content.length > 0)
+      .join("\n")
+
+    // Hapus pesan sistem yang sudah digabungkan
+    processedMessages = inputMessages.filter((msg) => msg.role !== "system")
+
+    // Tambahkan pesan sistem yang sudah digabungkan
+    if (combinedSystemContent.length > 0) {
+      processedMessages.unshift({
+        role: "system",
+        content: combinedSystemContent,
+      })
+    }
+  }
+
+  const messages: ChatMessage[] = []
+  for (const msg of processedMessages) {
+    if (msg.role === "user" && Array.isArray(msg.content)) {
+      const contents: ChatMessage = {
+        role: "user",
+        content: [] as ContentBlock[],
+      }
+      for (const item of msg.content) {
+        //@ts-ignore
+        if (item.type === "image_url") {
+          // try {
+          //   //@ts-ignore
+          //   const imagePath = await writeFileFromBase64Url(item.image_url.url)
+          //   console.log(imagePath)
+          //   const { file_url } = await providerApi.uploadFile(imagePath)
+          //   const image: ImageBlock = {
+          //     block_type: "image",
+          //     url: file_url,
+          //   }
+          //   //@ts-ignore
+          //   contents.content.push(image)
+          // } catch (error) {
+          //   console.error(error)
+          // }
+        } else {
+          //@ts-ignore
+          if (item.type === "text") {
+            const text: TextBlock = {
+              block_type: "text",
+              text: (item as TextBlock).text,
+            }
+            //@ts-ignore
+            contents.content.push(text)
+          }
+        }
+      }
+      messages.push(contents)
+    } else {
+      if (msg.role === "system") {
+        let systemContentStr = ""
+        let systemMsgContent: string[] = []
+        if (Array.isArray(msg.content)) {
+          for (const item of msg.content) {
+            if (item.type === "text") {
+              systemMsgContent.push((item as TextBlock).text)
+            }
+          }
+        } else {
+          systemContentStr = msg.content || ""
+        }
+        if (systemMsgContent.length > 0) {
+          systemContentStr = systemMsgContent.join("\n")
+        }
+        messages.push({
+          role: msg.role,
+          content: systemContentStr,
+        })
+      } else {
+        messages.push({
+          role: msg.role,
+          content: msg.content || "",
+        })
+      }
+    }
+  }
+  // console.log(messages)
+  // fs.writeFileSync(
+  //   `./messages-${Date.now()}.json`,
+  //   JSON.stringify(messages, null, 2)
+  // )
+  return messages
+}
+async function getChatRequestMessages(chatRequest: ChatCompletionRequest, providerApi: any) {
+  const promptMode = isPromptMode(chatRequest)
+  if (promptMode) {
+    return chatRequest.prompt
+      ? chatRequest.prompt.map((input: string) => ({
+          role: "user",
+          content: input,
+        }))
+      : []
+  }
+  return Array.isArray(chatRequest.messages) ? await getMessages(chatRequest.messages, providerApi) : []
+}
+
+export default getChatRequestMessages

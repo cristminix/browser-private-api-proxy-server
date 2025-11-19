@@ -2,21 +2,19 @@ import { Hono } from "hono"
 import { cors } from "hono/cors"
 import { createServer } from "node:http"
 import type { Context } from "hono"
-import type { Socket } from "socket.io"
-import { getSocketById, setupSocketIO } from "./socket-io-config"
-import { getSocketAppName, getSocketConnectionIds } from "./db/msocket"
 import cuid from "cuid"
-import { delay } from "./utils"
+import { delay, emitZaiSocket } from "./utils"
 import { streamSSE } from "hono/streaming"
 import { ChatAnswerHandler } from "./ChatAnswerHandler"
-
+import openai from "./openai"
+import { setupSocketIO } from "./socket-io-config"
 // Create Hono app
-const chatHandlerAnswer = new ChatAnswerHandler()
+const chatHandlerAnswer = ChatAnswerHandler.getInstance()
 const app = new Hono()
 let io: any = null
 // Enable CORS for all routes
 app.use("/*", cors())
-
+app.route("/v1", openai)
 // REST API endpoint
 app.get("/api/status", async (c: Context) => {
   return c.json({
@@ -26,40 +24,6 @@ app.get("/api/status", async (c: Context) => {
   })
 })
 
-const emitZaiSocket = async (eventName: string, data: unknown): Promise<Socket | null> => {
-  try {
-    const connectionIds = await getSocketConnectionIds()
-
-    if (!connectionIds || connectionIds.length === 0) {
-      console.warn("No active socket connections found")
-      return null
-    }
-
-    for (const socketId of connectionIds) {
-      try {
-        const appName = await getSocketAppName(socketId)
-
-        if (appName === "zai-proxy") {
-          const socket = getSocketById(io, socketId)
-
-          if (socket) {
-            socket.emit(eventName, data)
-            return socket
-          }
-        }
-      } catch (error) {
-        console.error(`Error processing socket ${socketId}:`, error)
-        // Continue with next socket in case of error
-      }
-    }
-
-    console.warn('No "zai-proxy" socket found among active connections')
-    return null
-  } catch (error) {
-    console.error("Error in emitZaiSocket:", error)
-    return null
-  }
-}
 app.get("/api/fake-stream-chat", async (c: Context) => {
   console.log("FAKE STREAM CHAT")
   c.header("Content-Type", "text/event-stream")
@@ -108,31 +72,31 @@ app.get("/api/fake-stream-chat", async (c: Context) => {
 app.get("/api/chat", async (c: Context) => {
   const prompt = c.req.query("prompt") || "What is the capital of france"
   let data: any = { success: false }
-  const socket = await emitZaiSocket("chat", { payload: { prompt }, requestId: cuid() })
+  const socket = await emitZaiSocket(io, "chat", { payload: { prompt }, requestId: cuid() })
   if (socket) {
     console.log(socket.id)
     data = await chatHandlerAnswer.waitForAnswer(socket.id)
   }
 
-  console.log(data)
+  // console.log(data)
   return c.json(data)
 })
 app.post("/api/chat", async (c: Context) => {
   const body = await c.req.json()
   const prompt = body.prompt || "What is the capital of france"
   let data: any = { success: false }
-  const socket = await emitZaiSocket("chat", { payload: { prompt }, requestId: cuid() })
+  const socket = await emitZaiSocket(io, "chat", { payload: { prompt }, requestId: cuid() })
   if (socket) {
     console.log(socket.id)
     data = await chatHandlerAnswer.waitForAnswer(socket.id)
   }
 
-  console.log(data)
+  // console.log(data)
   return c.json(data)
 })
 app.get("/api/reload-chat", async (c: Context) => {
   let data: any = { success: false }
-  data.success = await emitZaiSocket("chat-reload", { payload: {}, requestId: cuid() })
+  data.success = await emitZaiSocket(io, "chat-reload", { payload: {}, requestId: cuid() })
   return c.json({ success: true })
 })
 // Additional REST API endpoint for proxying
@@ -159,7 +123,6 @@ export function createHttpServer() {
 
   // Setup Socket.IO server
   io = setupSocketIO(server, chatHandlerAnswer)
-
   // Handle Hono requests through the raw HTTP server
   // Socket.IO will handle its own requests internally
   server.on("request", async (req, res) => {
@@ -222,6 +185,5 @@ export function createHttpServer() {
       }
     }
   })
-
   return server
 }
