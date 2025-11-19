@@ -31,6 +31,7 @@ async function insertAdministrators() {
       console.log(`Menyimpan data dengan key: ${keyName}`)
       await kvstore.put(keyName, item)
       console.log(`Berhasil menyimpan data dengan key: ${keyName}`)
+      //@ts-ignore
       administratorsKeys.push(keyName)
     } catch (error) {
       console.error("Error inserting data:", error)
@@ -53,9 +54,7 @@ async function insertAdministrators() {
     })
     console.log("Hasil pencarian:", result)
     // Filter hasil untuk mendapatkan entri spesifik
-    const specificResult = result.find(
-      (item: any) => item.key === `administrator_ckoyhjqbj0000mzkd1o63e31p`
-    )
+    const specificResult = result.find((item: any) => item.key === `administrator_ckoyhjqbj0000mzkd1o63e31p`)
     if (specificResult) {
       console.log("Data spesifik ditemukan:", specificResult)
     } else {

@@ -1,3 +1,5 @@
 onlyBuiltDependencies:
   - classic-level
   - esbuild
+  - lmdb
+  - msgpackr-extract

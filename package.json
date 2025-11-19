@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx  src/index.ts",
-    "build": "esbuild --bundle --platform=node  src/index.ts --outdir=dist",
+    "esbuild": "esbuild --minify --bundle src/index.ts --outdir=dist --platform=node",
+    "build": "tsc",
     "start": "node dist/index.js"
   },
   "keywords": [
@@ -22,6 +23,7 @@
     "hono": "^4.0.0",
     "level": "^10.0.0",
     "level-sublevel": "^6.6.5",
+    "lmdb": "^3.4.4",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
     "typescript": "^5.2.2"
