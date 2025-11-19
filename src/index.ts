@@ -11,7 +11,7 @@ const main = async () => {
 
   server.listen(PORT, () => {
     console.log(`Browser Private API Proxy Server running on port ${PORT}`)
-    console.log(`REST API available at http://localhost:${PORT}/api/status`)
+    console.log(`Openai Compatible Endpoint API available at http://localhost:${PORT}/v1/chat/completions`)
     console.log(`Socket.IO server available at http://localhost:${PORT}`)
   })
 
