@@ -19,7 +19,7 @@ class ZaiProvider {
         stream: true,
       },
       {},
-      true
+      false
     )
 
     // const reader = response.body.getReader()

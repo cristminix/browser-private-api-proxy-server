@@ -8,10 +8,13 @@ async function sendStreamResult(response: any, modelName: string, promptMode: bo
   c.header("Content-Type", "text/event-stream")
   c.header("Cache-Control", "no-cache")
   c.header("Connection", "keep-alive")
+  c.header("X-Accel-Buffering", "no") // Disable nginx buffering if behind nginx
   return streamSSE(c, async (stream) => {
     if (response) {
-      for await (const chunk of response) {
-        await stream.write(chunk)
+      for await (const data of response) {
+        // await stream.write(chunk)
+        // Force immediate flush by writing a comment and newline
+        await stream.writeSSE({ data: JSON.stringify(data) + "\n\n" })
       }
     }
   })

@@ -162,9 +162,33 @@ export function createHttpServer() {
             res.setHeader(key, value)
           }
           res.statusCode = response.status
-          const text = await response.text()
-          if (!res.writableEnded) {
-            res.end(text)
+
+          // Check if this is a streaming response
+          const contentType = response.headers.get("content-type")
+          if (contentType && contentType.includes("text/event-stream")) {
+            // For streaming responses, pipe the response body directly
+            if (response.body) {
+              response.body.pipeTo(
+                new WritableStream({
+                  write(chunk) {
+                    if (!res.writableEnded) {
+                      res.write(chunk)
+                    }
+                  },
+                  close() {
+                    if (!res.writableEnded) {
+                      res.end()
+                    }
+                  },
+                })
+              )
+            }
+          } else {
+            // For non-streaming responses, use the original approach
+            const text = await response.text()
+            if (!res.writableEnded) {
+              res.end(text)
+            }
           }
         }
       } else {
