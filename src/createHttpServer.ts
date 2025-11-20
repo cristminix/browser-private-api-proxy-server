@@ -3,7 +3,7 @@ import { cors } from "hono/cors"
 import { createServer } from "node:http"
 import { ChatAnswerHandler } from "./global/classes/ChatAnswerHandler"
 import openai from "./routes/openai"
-import common from "./routes/openai"
+import common from "./routes/common"
 import chatBridge from "./routes/chat-bridge"
 import { setupSocketIO } from "./setupSocketIO"
 // Create Hono app
