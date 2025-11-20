@@ -1,6 +1,7 @@
 // import { io } from "socket.io-client"
 
-import { makeStreamCompletion } from "./zai/makeStreamCompletion"
+import { makeStreamCompletion } from "../zai/makeStreamCompletion"
+
 // import fetch from "node:fetch"
 const main = async () => {
   // Get prompt from CLI arguments or use default
