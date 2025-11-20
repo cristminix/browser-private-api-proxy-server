@@ -11,10 +11,10 @@ class ChatAnswerHandler extends EventEmitter {
 
     return ChatAnswerHandler.instance
   }
-  waitForAnswer(socketId: string): Promise<any> {
+  waitForAnswer(socketId: string, requestId: string): Promise<any> {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
-        this.removeListener(`answer_${socketId}`, answerHandler)
+        this.removeListener(`answer_${socketId}_${requestId}`, answerHandler)
         reject(new Error("Timeout"))
       }, 60000)
 
@@ -23,12 +23,12 @@ class ChatAnswerHandler extends EventEmitter {
         resolve(data)
       }
 
-      this.once(`answer_${socketId}`, answerHandler)
+      this.once(`answer_${socketId}_${requestId}`, answerHandler)
     })
   }
 
-  notifyAnswer(socketId: string, data: any) {
-    this.emit(`answer_${socketId}`, data)
+  notifyAnswer(socketId: string, requestId: string, data: any) {
+    this.emit(`answer_${socketId}_${requestId}`, data)
   }
 }
 export { ChatAnswerHandler }

@@ -60,7 +60,9 @@ export function setupSocketIO(server: any, chatHandlerAnswer: ChatAnswerHandler)
 
     // Handle incoming messages from client
     socket.on("answer", (data) => {
-      chatHandlerAnswer.notifyAnswer(socket.id, data)
+      console.log(data)
+      const { requestId } = data
+      if (requestId) chatHandlerAnswer.notifyAnswer(socket.id, requestId, data)
     })
     socket.on("message", (data) => {
       try {

@@ -9,10 +9,11 @@ const app = new Hono()
 app.get("/chat", async (c: Context) => {
   const prompt = c.req.query("prompt") || "What is the capital of france"
   let data: any = { success: false }
-  const socket = await emitZaiSocket(ioInstance, "chat", { payload: { prompt }, requestId: cuid() })
+  const requestId = cuid()
+  const socket = await emitZaiSocket(ioInstance, "chat", { payload: { prompt }, requestId })
   if (socket) {
     console.log(socket.id)
-    data = await chatHandlerAnswer.waitForAnswer(socket.id)
+    data = await chatHandlerAnswer.waitForAnswer(socket.id, requestId)
   }
 
   // console.log(data)
@@ -22,10 +23,12 @@ app.post("/chat", async (c: Context) => {
   const body = await c.req.json()
   const prompt = body.prompt || "What is the capital of france"
   let data: any = { success: false }
-  const socket = await emitZaiSocket(ioInstance, "chat", { payload: { prompt }, requestId: cuid() })
+  const requestId = cuid()
+
+  const socket = await emitZaiSocket(ioInstance, "chat", { payload: { prompt }, requestId })
   if (socket) {
     console.log(socket.id)
-    data = await chatHandlerAnswer.waitForAnswer(socket.id)
+    data = await chatHandlerAnswer.waitForAnswer(socket.id, requestId)
   }
 
   // console.log(data)

@@ -17,10 +17,11 @@ class ZAIClient {
   async fetchWithBrowserProxy(userPrompt: string, realModel: string, transformedMessages: any, thinking: boolean) {
     const prompt = userPrompt
     let data: any = { success: false }
-    const socket = await emitZaiSocket(this.io, "chat", { payload: { prompt }, requestId: cuid() })
+    const requestId = cuid()
+    const socket = await emitZaiSocket(this.io, "chat", { payload: { prompt }, requestId })
     if (socket) {
       console.log(socket.id)
-      data = await this.chatHandler.waitForAnswer(socket.id)
+      data = await this.chatHandler.waitForAnswer(socket.id, requestId)
     }
     // console.log(data.phase)
     if (data.phase === "FETCH") {
