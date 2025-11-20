@@ -1,5 +1,5 @@
 import { updateSocketConnectionIds } from "./db/msocket"
-import { createHttpServer } from "./server-config"
+import { createHttpServer } from "./createHttpServer"
 const main = async () => {
   await updateSocketConnectionIds("", "init", true)
 

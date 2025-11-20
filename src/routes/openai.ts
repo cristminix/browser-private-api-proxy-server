@@ -1,8 +1,8 @@
 import { Context, Hono } from "hono"
 // import { ChatAnswerHandler } from "./ChatAnswerHandler"
-import handleCompletions from "./openai/handleCompletions"
-import { ioInstance } from "./socket-io-config"
-import { ChatAnswerHandler } from "./ChatAnswerHandler"
+import handleCompletions from "../openai/handleCompletions"
+import { ioInstance } from "../setupSocketIO"
+import { ChatAnswerHandler } from "../global/classes/ChatAnswerHandler"
 const chatHandlerAnswer: ChatAnswerHandler = ChatAnswerHandler.getInstance()
 
 const app = new Hono()

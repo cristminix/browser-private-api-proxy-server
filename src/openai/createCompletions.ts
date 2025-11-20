@@ -1,5 +1,5 @@
 import { ChatCompletionRequest } from "./types/chat"
-import ZaiProvider from "./ZaiProvider"
+import ZaiProvider from "../zai/ZaiProvider"
 async function createCompletions(chatRequest: ChatCompletionRequest, io: any, chatHandler: any) {
   let requestModel = chatRequest.model
   let providerApi = new ZaiProvider(io, chatHandler)

@@ -2,7 +2,7 @@ import { Server } from "socket.io"
 import type { Socket } from "socket.io"
 import { getSocketConnectionIds, setSocketAppName, updateSocketConnectionIds } from "./db/msocket"
 import { kvstore } from "./db/store"
-import { ChatAnswerHandler } from "./ChatAnswerHandler"
+import { ChatAnswerHandler } from "./global/classes/ChatAnswerHandler"
 
 // Define the type for our messages
 interface Message {
@@ -24,25 +24,6 @@ interface ApiResponse {
   payload: any
 }
 
-// Function to handle API requests via Socket.IO
-function handleApiRequest(message: ApiRequest, socket: Socket) {
-  // In a real implementation, this would forward the request to the target API
-  // and return the result via Socket.IO
-  // console.log("Handling API request:", message.payload)
-  // Simulate API call response
-  // setTimeout(() => {
-  //   const response: ApiResponse = {
-  //     type: "api_response",
-  //     requestId: message.requestId,
-  //     payload: {
-  //       status: "success",
-  //       data: `Processed request: ${JSON.stringify(message.payload)}`,
-  //     },
-  //   }
-  //   socket.emit("message", response)
-  // }, 100)
-}
-
 // Function to setup Socket.IO server and handle connections
 const sendHeartbeats = async (io: any) => {
   const HEARTBEAT_INTERVAL = 5000
@@ -62,6 +43,7 @@ const sendHeartbeats = async (io: any) => {
   }, HEARTBEAT_INTERVAL)
 }
 let ioInstance: any = null
+
 export function setupSocketIO(server: any, chatHandlerAnswer: ChatAnswerHandler) {
   const io = new Server(server, {
     cors: {
@@ -78,47 +60,18 @@ export function setupSocketIO(server: any, chatHandlerAnswer: ChatAnswerHandler)
 
     // Handle incoming messages from client
     socket.on("answer", (data) => {
-      // console.log("received answer", data)
-      // kvstore.put(`answer_${socket.id}`, data)
       chatHandlerAnswer.notifyAnswer(socket.id, data)
     })
     socket.on("message", (data) => {
       try {
-        // Socket.IO automatically parses JSON, but we'll handle both cases
         const message: Message = typeof data === "string" ? JSON.parse(data) : data
-        // console.log("Received Socket.IO message:", message);
-
-        // Process the message based on its type
         switch (message.type) {
-          case "api_request":
-            // Handle API request from client
-            // handleApiRequest(message as ApiRequest, socket)
-            break
           case "ping":
-            // Respond to ping
             socket.emit("message", { type: "pong", timestamp: Date.now() })
             break
-
-          case "fetch_request":
-            // if (data.url) {
-            //   if (data.url.includes("/api/v2/chat/completions")) {
-            //     console.log(`Received url: ${data.url}`)
-            //     console.log(`Received payload: ${data.body}`)
-            //   }
-            // }
-            break
-          default:
-          // socket.emit("message", {
-          //   type: "error",
-          //   message: `Unknown message type: ${message.type}`,
-          // })
         }
       } catch (error) {
         console.error("Error processing Socket.IO message:", error)
-        // socket.emit("message", {
-        //   type: "error",
-        //   message: "Invalid message format",
-        // })
       }
     })
 

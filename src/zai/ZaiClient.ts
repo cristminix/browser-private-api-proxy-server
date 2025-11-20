@@ -2,10 +2,9 @@ import { transformMessages } from "../zai/transformRequestMessages"
 import { getLastUserMessageContent } from "../zai/getLastUserMessageContent"
 import { buildStreamChunk } from "../zai/buildStreamChunk"
 import fs from "fs"
-import path from "path"
-import { emitZaiSocket } from "../utils"
 import cuid from "cuid"
-import { ChatAnswerHandler } from "../ChatAnswerHandler"
+import { ChatAnswerHandler } from "../global/classes/ChatAnswerHandler"
+import { emitZaiSocket } from "./emitZaiSocket"
 class ZAIClient {
   baseUrl = "https://chat.z.ai"
   io: any
@@ -16,11 +15,6 @@ class ZAIClient {
     this.chatHandler = chatHandler
   }
   async fetchWithBrowserProxy(userPrompt: string, realModel: string, transformedMessages: any, thinking: boolean) {
-    // const prompt = userPrompt
-    // // const startTime = performance.now()
-    // const response = await fetch(`http://127.0.0.1:4001/api/chat?prompt=${encodeURIComponent(prompt)}`)
-    // let data = await response.json()
-
     const prompt = userPrompt
     let data: any = { success: false }
     const socket = await emitZaiSocket(this.io, "chat", { payload: { prompt }, requestId: cuid() })

@@ -1,4 +1,4 @@
-import { ChatCompletionRequest, ChatResponse, ChatResponseStream } from "./types/chat"
+import { ChatCompletionRequest, ChatResponse, ChatResponseStream } from "../openai/types/chat"
 import ZaiClient from "./ZaiClient"
 
 class ZaiProvider {
