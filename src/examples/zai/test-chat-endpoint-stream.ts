@@ -8,7 +8,7 @@ const main = async () => {
   const prompt = process.argv[2] || "Gimme the recommended places in the world"
   // const startTime = performance.now()
   const response = await fetch(
-    `http://127.0.0.1:4001/api/chat?model=zai&prompt=${encodeURIComponent(
+    `http://127.0.0.1:4001/api/chat?platform=z.ai&prompt=${encodeURIComponent(
       prompt
     )}`
   )

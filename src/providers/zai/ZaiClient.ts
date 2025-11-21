@@ -1,6 +1,6 @@
 import { transformMessages } from "./transformRequestMessages"
 import { getLastUserMessageContent } from "./getLastUserMessageContent"
-import { buildStreamChunk } from "./buildStreamChunk"
+import { buildStreamChunk } from "../../openai/buildStreamChunk"
 import fs from "fs"
 import cuid from "cuid"
 import { ChatAnswerHandler } from "../../global/classes/ChatAnswerHandler"

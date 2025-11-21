@@ -10,10 +10,10 @@ const chatHandlerAnswer: ChatAnswerHandler = ChatAnswerHandler.getInstance()
 const app = new Hono()
 app.get("/chat", async (c: Context) => {
   const prompt = c.req.query("prompt") || "What is the capital of france"
-  const model = c.req.query("model") || "zai"
+  const platform = c.req.query("platform") || "z.ai"
   let data: any = { success: false }
   const requestId = cuid()
-  const appName = model === "zai" ? "zai-proxy" : "oreilly-proxy"
+  const appName = platform === "z.ai" ? "zai-proxy" : "mistral-proxy"
   const socket = await emitSocket(ioInstance, appName, "chat", {
     payload: { prompt },
     requestId,
@@ -52,8 +52,11 @@ app.post("/chat", async (c: Context) => {
 })
 
 app.get("/reload-chat", async (c: Context) => {
+  const platform = c.req.query("platform") || "z.ai"
+  const appName = platform === "z.ai" ? "zai-proxy" : "mistral-proxy"
+
   let data: any = { success: false }
-  data.success = await emitZaiSocket(ioInstance, "chat-reload", {
+  data.success = await emitSocket(ioInstance, appName, "chat-reload", {
     payload: {},
     requestId: cuid(),
   })
