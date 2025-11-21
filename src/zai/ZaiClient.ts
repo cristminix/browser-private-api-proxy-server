@@ -6,9 +6,11 @@ import cuid from "cuid"
 import { ChatAnswerHandler } from "../global/classes/ChatAnswerHandler"
 import { emitZaiSocket } from "./emitZaiSocket"
 import { setSocketBusy, unsetSocketBusy } from "../db/msocket"
+import { Server as SocketIOServer } from "socket.io"
+
 class ZAIClient {
   baseUrl = "https://chat.z.ai"
-  io: any
+  io: SocketIOServer
   chatHandler: ChatAnswerHandler
 
   constructor(io: any, chatHandler: any) {

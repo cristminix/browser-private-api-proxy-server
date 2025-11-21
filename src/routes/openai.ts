@@ -9,7 +9,7 @@ const app = new Hono()
 app.get("/models", async (c: Context) => {
   return c.json({
     type: "list",
-    data: [{ model: "glm-4.6", id: "glm-4.6", alias: "glm-4.6", provider: "zai" }],
+    data: [{ model: "zai", id: "zai", alias: "zai", provider: "zai" }],
   })
 })
 app.post("/chat/completions", async (c: Context) => {

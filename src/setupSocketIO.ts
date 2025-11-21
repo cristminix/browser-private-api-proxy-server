@@ -1,27 +1,17 @@
-import { Server } from "socket.io"
+import { Server as SocketIOServer } from "socket.io"
 import type { Socket } from "socket.io"
-import { getSocketConnectionIds, setSocketAppName, updateSocketConnectionIds } from "./db/msocket"
-import { kvstore } from "./db/store"
+import type { Server as HttpServer } from "http"
+import {
+  getSocketConnectionIds,
+  setSocketAppName,
+  updateSocketConnectionIds,
+} from "./db/msocket"
 import { ChatAnswerHandler } from "./global/classes/ChatAnswerHandler"
 
 // Define the type for our messages
 interface Message {
   type: string
   [key: string]: any
-}
-
-// Define the type for our API request payload
-interface ApiRequest {
-  type: "api_request"
-  requestId?: string
-  payload: any
-}
-
-// Define the type for our API response payload
-interface ApiResponse {
-  type: "api_response"
-  requestId?: string
-  payload: any
 }
 
 // Function to setup Socket.IO server and handle connections
@@ -44,8 +34,11 @@ const sendHeartbeats = async (io: any) => {
 }
 let ioInstance: any = null
 
-export function setupSocketIO(server: any, chatHandlerAnswer: ChatAnswerHandler) {
-  const io = new Server(server, {
+export function setupSocketIO(
+  server: HttpServer,
+  chatHandlerAnswer: ChatAnswerHandler
+): SocketIOServer {
+  const io = new SocketIOServer(server, {
     cors: {
       origin: "*", // In production, specify your allowed origins
       methods: ["GET", "POST"],
@@ -66,7 +59,8 @@ export function setupSocketIO(server: any, chatHandlerAnswer: ChatAnswerHandler)
     })
     socket.on("message", (data) => {
       try {
-        const message: Message = typeof data === "string" ? JSON.parse(data) : data
+        const message: Message =
+          typeof data === "string" ? JSON.parse(data) : data
         switch (message.type) {
           case "ping":
             socket.emit("message", { type: "pong", timestamp: Date.now() })
@@ -79,7 +73,12 @@ export function setupSocketIO(server: any, chatHandlerAnswer: ChatAnswerHandler)
 
     // Handle client disconnect
     socket.on("disconnect", (reason) => {
-      console.log("Socket.IO client disconnected:", socket.id, "reason:", reason)
+      console.log(
+        "Socket.IO client disconnected:",
+        socket.id,
+        "reason:",
+        reason
+      )
       updateSocketConnectionIds(socket.id, "out")
     })
 
