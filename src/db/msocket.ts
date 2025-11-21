@@ -1,10 +1,6 @@
 import { kvstore } from "./store"
 
-const updateSocketConnectionIds = async (
-  socketId: string,
-  t: string = "in",
-  init = false
-) => {
+const updateSocketConnectionIds = async (socketId: string, t: string = "in", init = false) => {
   let connectionIds = init ? [] : await kvstore.get("connectionIds")
   if (!connectionIds) {
     connectionIds = []
@@ -34,13 +30,16 @@ const unsetSocketAppName = async (socketId: string) => {
   return await kvstore.delete(`appname_${socketId}`)
 }
 const setSocketAppName = async (socketId: string, appName: string) => {
-  await await kvstore.put(`appname_${socketId}`, appName)
+  return await kvstore.put(`appname_${socketId}`, appName)
 }
 
-export {
-  updateSocketConnectionIds,
-  getSocketConnectionIds,
-  getSocketAppName,
-  setSocketAppName,
-  unsetSocketAppName,
+const setSocketBusy = async (socketId: string) => {
+  return await kvstore.put(`busy_${socketId}`, true)
 }
+const unsetSocketBusy = async (socketId: string) => {
+  return await kvstore.delete(`busy_${socketId}`)
+}
+const getSocketBusy = async (socketId: string) => {
+  return await kvstore.get(`busy_${socketId}`)
+}
+export { updateSocketConnectionIds, getSocketConnectionIds, getSocketAppName, setSocketAppName, unsetSocketAppName, setSocketBusy, unsetSocketBusy, getSocketBusy }

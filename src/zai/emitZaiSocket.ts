@@ -1,5 +1,5 @@
 import { Socket } from "socket.io"
-import { getSocketAppName, getSocketConnectionIds } from "../db/msocket"
+import { getSocketAppName, getSocketBusy, getSocketConnectionIds, setSocketBusy } from "../db/msocket"
 import { getSocketById } from "../global/fn/getSocketById"
 
 const emitZaiSocket = async (io: any, eventName: string, data: unknown): Promise<Socket | null> => {
@@ -14,8 +14,13 @@ const emitZaiSocket = async (io: any, eventName: string, data: unknown): Promise
     for (const socketId of connectionIds) {
       try {
         const appName = await getSocketAppName(socketId)
-
+        console.log({ socketId, appName })
         if (appName === "zai-proxy") {
+          const socketBusy = await getSocketBusy(socketId)
+          console.log({ socketId, socketBusy })
+          if (socketBusy) {
+            continue
+          }
           const socket = getSocketById(io, socketId)
 
           if (socket) {

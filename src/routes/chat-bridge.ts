@@ -3,6 +3,7 @@ import { ioInstance } from "../setupSocketIO"
 import { ChatAnswerHandler } from "../global/classes/ChatAnswerHandler"
 import { emitZaiSocket } from "../zai/emitZaiSocket"
 import cuid from "cuid"
+import { setSocketBusy, unsetSocketBusy } from "src/db/msocket"
 const chatHandlerAnswer: ChatAnswerHandler = ChatAnswerHandler.getInstance()
 
 const app = new Hono()
@@ -13,7 +14,10 @@ app.get("/chat", async (c: Context) => {
   const socket = await emitZaiSocket(ioInstance, "chat", { payload: { prompt }, requestId })
   if (socket) {
     console.log(socket.id)
+    await setSocketBusy(socket.id)
+
     data = await chatHandlerAnswer.waitForAnswer(socket.id, requestId)
+    await unsetSocketBusy(socket.id)
   }
 
   // console.log(data)
@@ -27,8 +31,11 @@ app.post("/chat", async (c: Context) => {
 
   const socket = await emitZaiSocket(ioInstance, "chat", { payload: { prompt }, requestId })
   if (socket) {
+    await setSocketBusy(socket.id)
+
     console.log(socket.id)
     data = await chatHandlerAnswer.waitForAnswer(socket.id, requestId)
+    await unsetSocketBusy(socket.id)
   }
 
   // console.log(data)

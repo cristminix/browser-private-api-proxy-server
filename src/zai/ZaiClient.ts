@@ -5,6 +5,7 @@ import fs from "fs"
 import cuid from "cuid"
 import { ChatAnswerHandler } from "../global/classes/ChatAnswerHandler"
 import { emitZaiSocket } from "./emitZaiSocket"
+import { setSocketBusy, unsetSocketBusy } from "src/db/msocket"
 class ZAIClient {
   baseUrl = "https://chat.z.ai"
   io: any
@@ -21,7 +22,9 @@ class ZAIClient {
     const socket = await emitZaiSocket(this.io, "chat", { payload: { prompt }, requestId })
     if (socket) {
       console.log(socket.id)
+      await setSocketBusy(socket.id)
       data = await this.chatHandler.waitForAnswer(socket.id, requestId)
+      await unsetSocketBusy(socket.id)
     }
     // console.log(data.phase)
     if (data.phase === "FETCH") {
