@@ -1,17 +1,20 @@
 import { Context, Hono } from "hono"
 import { ioInstance } from "../setupSocketIO"
 import { ChatAnswerHandler } from "../global/classes/ChatAnswerHandler"
-import { emitZaiSocket } from "../zai/emitZaiSocket"
+import { emitZaiSocket } from "../providers/zai/emitZaiSocket"
 import cuid from "cuid"
 import { setSocketBusy, unsetSocketBusy } from "../db/msocket"
+import { emitSocket } from "../global/fn/emitSocket"
 const chatHandlerAnswer: ChatAnswerHandler = ChatAnswerHandler.getInstance()
 
 const app = new Hono()
 app.get("/chat", async (c: Context) => {
   const prompt = c.req.query("prompt") || "What is the capital of france"
+  const model = c.req.query("model") || "zai"
   let data: any = { success: false }
   const requestId = cuid()
-  const socket = await emitZaiSocket(ioInstance, "chat", {
+  const appName = model === "zai" ? "zai-proxy" : "oreally-proxy"
+  const socket = await emitSocket(ioInstance, appName, "chat", {
     payload: { prompt },
     requestId,
   })

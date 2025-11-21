@@ -6,10 +6,19 @@ import { ChatAnswerHandler } from "../global/classes/ChatAnswerHandler"
 const chatHandlerAnswer: ChatAnswerHandler = ChatAnswerHandler.getInstance()
 
 const app = new Hono()
+
+// Helper function untuk membuat objek model dengan properti yang sama
+const createModel = (name: string) => ({
+  model: name,
+  id: name,
+  alias: name,
+  provider: name,
+})
+
 app.get("/models", async (c: Context) => {
   return c.json({
     type: "list",
-    data: [{ model: "zai", id: "zai", alias: "zai", provider: "zai" }],
+    data: [createModel("zai"), createModel("oreally")],
   })
 })
 app.post("/chat/completions", async (c: Context) => {

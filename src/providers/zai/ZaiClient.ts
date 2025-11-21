@@ -3,9 +3,9 @@ import { getLastUserMessageContent } from "./getLastUserMessageContent"
 import { buildStreamChunk } from "./buildStreamChunk"
 import fs from "fs"
 import cuid from "cuid"
-import { ChatAnswerHandler } from "../global/classes/ChatAnswerHandler"
+import { ChatAnswerHandler } from "../../global/classes/ChatAnswerHandler"
 import { emitZaiSocket } from "./emitZaiSocket"
-import { setSocketBusy, unsetSocketBusy } from "../db/msocket"
+import { setSocketBusy, unsetSocketBusy } from "../../db/msocket"
 import { Server as SocketIOServer } from "socket.io"
 
 class ZAIClient {

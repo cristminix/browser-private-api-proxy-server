@@ -1,6 +1,6 @@
 import { Socket } from "socket.io"
 
-import { emitSocket } from "../global/fn/emitSocket"
+import { emitSocket } from "../../global/fn/emitSocket"
 
 const emitZaiSocket = async (
   io: any,

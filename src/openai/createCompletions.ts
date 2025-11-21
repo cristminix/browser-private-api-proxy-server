@@ -1,6 +1,10 @@
 import { ChatCompletionRequest } from "./types/chat"
-import ZaiProvider from "../zai/ZaiProvider"
-async function createCompletions(chatRequest: ChatCompletionRequest, io: any, chatHandler: any) {
+import ZaiProvider from "../providers/zai/ZaiProvider"
+async function createCompletions(
+  chatRequest: ChatCompletionRequest,
+  io: any,
+  chatHandler: any
+) {
   let requestModel = chatRequest.model
   let providerApi = new ZaiProvider(io, chatHandler)
   //@ts-ignore
@@ -12,7 +16,9 @@ async function createCompletions(chatRequest: ChatCompletionRequest, io: any, ch
 
   console.log("realModel", realModel)
   //@ts-ignore
-  return streaming ? providerApi.stream(chatRequest) : providerApi.create(chatRequest)
+  return streaming
+    ? providerApi.stream(chatRequest)
+    : providerApi.create(chatRequest)
 }
 
 export default createCompletions

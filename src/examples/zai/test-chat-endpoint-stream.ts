@@ -1,13 +1,17 @@
 // import { io } from "socket.io-client"
 
-import { makeStreamCompletion } from "../zai/makeStreamCompletion"
+import { makeStreamCompletion } from "../../providers/zai/makeStreamCompletion"
 
 // import fetch from "node:fetch"
 const main = async () => {
   // Get prompt from CLI arguments or use default
   const prompt = process.argv[2] || "Gimme the recommended places in the world"
   // const startTime = performance.now()
-  const response = await fetch(`http://127.0.0.1:4001/api/chat?prompt=${encodeURIComponent(prompt)}`)
+  const response = await fetch(
+    `http://127.0.0.1:4001/api/chat?model=zai&prompt=${encodeURIComponent(
+      prompt
+    )}`
+  )
   let data = await response.json()
   // console.log(data.phase)
   if (data.phase === "FETCH") {
@@ -25,7 +29,10 @@ const main = async () => {
        * 
       */
       // console.log(jsonBody)
-      jsonBody.messages = [{ role: "system", content: "Jawab singkat saja" }, ...jsonBody.messages]
+      jsonBody.messages = [
+        { role: "system", content: "Jawab singkat saja" },
+        ...jsonBody.messages,
+      ]
       body = JSON.stringify(jsonBody)
     }
     const response = await fetch(`https://chat.z.ai${url}`, {
