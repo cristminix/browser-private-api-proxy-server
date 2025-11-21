@@ -13,7 +13,7 @@ app.get("/chat", async (c: Context) => {
   const model = c.req.query("model") || "zai"
   let data: any = { success: false }
   const requestId = cuid()
-  const appName = model === "zai" ? "zai-proxy" : "oreally-proxy"
+  const appName = model === "zai" ? "zai-proxy" : "oreilly-proxy"
   const socket = await emitSocket(ioInstance, appName, "chat", {
     payload: { prompt },
     requestId,
