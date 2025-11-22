@@ -1,35 +1,12 @@
-import * as fs from "fs"
-import * as path from "path"
 import * as readline from "readline"
 import { marked } from "marked"
 
 import { markedTerminal } from "marked-terminal"
-import { ChatHistoryEntry } from "../../global/classes/ChatHistoryEntry"
 import { ChatSession } from "../../global/classes/ChatSession"
 import cuid from "cuid"
 import { makeStreamCompletion } from "src/providers/deepseek/makeStreamCompletion"
 import { sendChatFinal } from "./sendChatFInal"
 
-/**
- * Loads chat history from a JSON file
- * @param filename - The name of the JSON file to load
- * @returns The parsed chat history array
- */
-function loadJsonFile(filename: string): ChatHistoryEntry[] {
-  const filePath = path.join(__dirname, filename)
-  const fileContent = fs.readFileSync(filePath, "utf-8")
-  return JSON.parse(fileContent) as ChatHistoryEntry[]
-}
-
-/**
- * Saves chat history to a JSON file
- * @param filename - The name of the JSON file to save
- * @param data - The chat history data to save
- */
-function saveJsonFile(filename: string, data: ChatHistoryEntry[]): void {
-  const filePath = path.join(__dirname, filename)
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8")
-}
 function generateSession() {
   // console.log(headers)
   // Create a session ID based on specific header values
@@ -114,8 +91,7 @@ async function main() {
           // console.log("saveMessage", { message })
         },
         onSaveAssistantMessage: (message) => {
-          if (message.content.length === 0)
-            message.content = outputBuffer_content
+          if (message.content.length === 0) message.content = outputBuffer_content
           chatSession?.insertAssistantMessage(message.content, message.id)
         },
       }
@@ -147,17 +123,9 @@ async function main() {
           // console.log(chunk)
           if (chunk) {
             // Type guard to check if chunk is the expected object type (not Uint8Array)
-            if (
-              !(chunk instanceof Uint8Array) &&
-              typeof chunk === "object" &&
-              "choices" in chunk
-            ) {
+            if (!(chunk instanceof Uint8Array) && typeof chunk === "object" && "choices" in chunk) {
               const typedChunk = chunk as StreamChunk
-              if (
-                typedChunk.choices &&
-                Array.isArray(typedChunk.choices) &&
-                typedChunk.choices.length > 0
-              ) {
+              if (typedChunk.choices && Array.isArray(typedChunk.choices) && typedChunk.choices.length > 0) {
                 const bufferChunk = typedChunk.choices[0].delta.content
                 if (bufferChunk) {
                   outputBuffer_content += bufferChunk
