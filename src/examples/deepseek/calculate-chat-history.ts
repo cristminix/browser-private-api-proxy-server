@@ -13,7 +13,7 @@ const main = async () => {
   const chatId = "cmi9ur3ym00004ctd0tg68tt7"
   const chatHistoryDir = "src/examples/chat-history"
   // iter 1
-  let messages = await loadJsonFile(process.cwd() + "/logs/3ldzqd/messages-00.json")
+  let messages = await loadJsonFile(process.cwd() + "/chat-input-test/3ldzqd/messages-00.json")
   let history: any[] = [] // await loadChatHistory(chatHistoryDir, chatId)
 
   let transformedMessages = transformMessages(messages)
@@ -35,7 +35,7 @@ const main = async () => {
   ]
   // save history
   await saveChatHistory(chatHistoryDir, chatId, history)
-  messages = await loadJsonFile(process.cwd() + "/logs/3ldzqd/messages-01.json")
+  messages = await loadJsonFile(process.cwd() + "/chat-input-test/3ldzqd/messages-01.json")
   transformedMessages = transformMessages(messages)
   // console.log(transformedMessages)
   userMessages = getUserMessages(transformedMessages, history)

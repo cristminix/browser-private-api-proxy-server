@@ -33,3 +33,6 @@ Thumbs.db
 
 # Storage data folder
 storage/data/
+
+# Chat history examples
+src/examples/chat-history/
