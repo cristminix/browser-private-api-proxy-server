@@ -24,9 +24,12 @@
     "level": "^10.0.0",
     "level-sublevel": "^6.6.5",
     "lmdb": "^3.4.4",
+    "marked": "^17.0.1",
+    "marked-terminal": "^7.3.0",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "xmlbuilder2": "^4.0.0"
   },
   "devDependencies": {
     "@hono/node-server": "^1.0.0",

@@ -48,25 +48,37 @@ interface StreamState {
  * @param options - Configuration options for stream processing
  * @returns Promise that resolves when stream processing is complete
  */
-export async function makeStreamCompletion(response: Response, options: Partial<StreamOptions> | string = {}): Promise<void> {
+export async function* makeStreamCompletion(
+  response: Response,
+  options: Partial<StreamOptions> | string = {}
+): AsyncGenerator<any, void, unknown> {
   // Handle backward compatibility where options was a boolean
   const config: StreamOptions =
     typeof options === "boolean"
-      ? { sso: options, model: "", print: true }
+      ? { sso: options, model: "", print: false }
       : {
           sso: false,
-          print: true,
+          print: false,
           model: "",
           ...(options as Partial<StreamOptions>),
         }
 
-  const { sso = false, model = "", print = true, onError, onData, onDone } = config
+  const {
+    sso = false,
+    model = "",
+    print = false,
+    onError,
+    onData,
+    onDone,
+  } = config
 
   try {
     // Validate response with more detailed error message
     if (!response.ok) {
       const errorText = await response.text()
-      const error = new Error(`API request failed with status ${response.status}: ${errorText}`)
+      const error = new Error(
+        `API request failed with status ${response.status}: ${errorText}`
+      )
       if (onError) onError(error)
       throw error
     }
@@ -88,8 +100,14 @@ export async function makeStreamCompletion(response: Response, options: Partial<
       validStream: true,
     }
 
-    // Process the stream
-    await processStream(response, state, { sso, model, print, onData, onDone })
+    // Process the stream and yield results
+    yield* processStreamWithYield(response, state, {
+      sso,
+      model,
+      print,
+      onData,
+      onDone,
+    })
   } catch (error) {
     if (onError && error instanceof Error) {
       onError(error)
@@ -130,6 +148,44 @@ async function processStream(
 
       // Process complete lines from buffer
       await processBufferLines(state, options)
+    }
+  } finally {
+    // Ensure reader is released even if an error occurs
+    reader.releaseLock()
+  }
+}
+
+/**
+ * Process the stream data and yield results
+ */
+async function* processStreamWithYield(
+  response: Response,
+  state: StreamState,
+  options: {
+    sso: boolean
+    model: string
+    print: boolean
+    onData?: (chunk: any) => void
+    onDone?: (usage: UsageData) => void
+  }
+): AsyncGenerator<any, void, unknown> {
+  const reader = response.body!.getReader()
+  const decoder = new TextDecoder()
+
+  try {
+    while (state.validStream) {
+      const { done, value } = await reader.read()
+
+      if (done) {
+        handleStreamCompletion(state, options)
+        break
+      }
+
+      // Decode the chunk and add to buffer
+      state.buffer += decoder.decode(value, { stream: true })
+
+      // Process complete lines from buffer and yield results
+      yield* processBufferLinesWithYield(state, options)
     }
   } finally {
     // Ensure reader is released even if an error occurs
@@ -210,6 +266,34 @@ async function processBufferLines(
 }
 
 /**
+ * Process complete lines from buffer and yield results
+ */
+async function* processBufferLinesWithYield(
+  state: StreamState,
+  options: {
+    sso: boolean
+    model: string
+    print: boolean
+    onData?: (chunk: any) => void
+  }
+): AsyncGenerator<any, void, unknown> {
+  // Split buffer by newlines and process each part
+  const lines = state.buffer.split("\n")
+
+  // Keep the last incomplete part in buffer
+  state.buffer = lines.pop() || ""
+
+  // Process each complete line
+  for (const line of lines) {
+    // console.log({ line })
+    const result = await processLineWithYield(line, state, options)
+    if (result) {
+      yield result
+    }
+  }
+}
+
+/**
  * Process a single line from the stream
  */
 async function processLine(
@@ -258,6 +342,60 @@ async function processLine(
 }
 
 /**
+ * Process a single line from the stream and return result
+ */
+async function processLineWithYield(
+  line: string,
+  state: StreamState,
+  options: {
+    sso: boolean
+    model: string
+    print: boolean
+    onData?: (chunk: any) => void
+  }
+): Promise<any> {
+  const { sso, model, print, onData } = options
+
+  // Skip empty lines or DONE markers
+  if (!line.trim() || line === "data: [DONE]") {
+    return null
+  }
+
+  try {
+    // Process only data lines
+    if (line.startsWith("data: ")) {
+      // Extract JSON string after "data: "
+      const jsonString = line.slice(6)
+
+      // Validate that we have JSON content
+      if (!jsonString) {
+        return null
+      }
+
+      const jsonData: any = JSON.parse(jsonString)
+      // const { v } = jsonData
+      // if (v) {
+      return await processChatCompletionWithYield(jsonData, state, {
+        model,
+        print,
+        onData,
+      })
+      // }
+    }
+  } catch (err) {
+    // Log parsing errors but continue processing
+    console.error("Error parsing stream line:", line, err)
+
+    // For robustness, we could also emit an error event in SSO mode
+    if (sso && err instanceof Error) {
+      console.error("Stream parsing error:", err.message)
+    }
+  }
+
+  return null
+}
+
+/**
  * Process chat completion data
  */
 async function processChatCompletion(
@@ -291,7 +429,7 @@ async function processChatCompletion(
     }
 
     if (print && result.choices[0].delta.content) {
-      process.stdout.write(result.choices[0].delta.content)
+      // process.stdout.write(result.choices[0].delta.content)
     }
 
     // Only increment completion ID if not a completion end event
@@ -299,7 +437,7 @@ async function processChatCompletion(
     //   state.completionId++
     // }
   } else {
-    console.log(jsonData)
+    // console.log(jsonData)
   }
 
   // if (done) {
@@ -311,9 +449,68 @@ async function processChatCompletion(
 }
 
 /**
+ * Process chat completion data and return result
+ */
+async function processChatCompletionWithYield(
+  jsonData: StreamData,
+  state: StreamState,
+  options: {
+    model: string
+    print: boolean
+    onData?: (chunk: any) => void
+  }
+): Promise<any> {
+  const { model, print, onData } = options
+  const { data } = jsonData
+  // const { done, usage, error } = data
+
+  // if (usage) {
+  //   state.calculatedUsage = usage
+  // }
+
+  // if (error) {
+  //   state.validStream = false
+  //   console.error("Stream error:", error)
+  //   return null
+  // }
+
+  const result = convertToOpenaiTextStream(jsonData, model, state.completionId)
+
+  if (result) {
+    if (onData) {
+      onData(result)
+    }
+
+    if (print && result.choices[0].delta.content) {
+      process.stdout.write(result.choices[0].delta.content)
+    }
+
+    // Only increment completion ID if not a completion end event
+    // if (!done) {
+    //   state.completionId++
+    // }
+  } else {
+    // console.log(jsonData)
+  }
+
+  // if (done) {
+  //   state.completionId++
+  //   if (print) {
+  //     process.stdout.write("\n\n")
+  //   }
+  // }
+
+  return result
+}
+
+/**
  * Convert stream data to OpenAI-compatible format
  */
-function convertToOpenaiTextStream(jsonData: any, model: string, completionId: number): any | null {
+function convertToOpenaiTextStream(
+  jsonData: any,
+  model: string,
+  completionId: number
+): any | null {
   const { v: inputData } = jsonData
   let content, done
   if (typeof inputData === "string") {
