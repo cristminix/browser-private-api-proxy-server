@@ -4,7 +4,7 @@ export function getUserMessages(messages: any[], history: any[]) {
   if (Array.isArray(history)) {
     if (history.length > 0) {
       userMessages = messages.slice(history.length - 1)
-      return userMessages
+      return userMessages.filter((m) => m.role === "user")
     }
   }
 
@@ -12,10 +12,10 @@ export function getUserMessages(messages: any[], history: any[]) {
 
   const lastAssistantIndex = messages.findLastIndex((m) => m.role === "assistant")
   if (lastAssistantIndex !== -1) {
-    userMessages = messages.filter((m) => m.role !== "system").slice(lastAssistantIndex + 1)
+    userMessages = messages.filter((m) => m.role !== "system").slice(lastAssistantIndex)
   } else {
     userMessages = messages.filter((m) => m.role !== "system")
   }
   // console.log({ userMessages })
-  return userMessages
+  return userMessages.filter((m) => m.role === "user")
 }

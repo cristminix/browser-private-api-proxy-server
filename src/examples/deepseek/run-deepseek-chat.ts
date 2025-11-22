@@ -2,7 +2,6 @@ import * as readline from "readline"
 import { marked } from "marked"
 
 import { markedTerminal } from "marked-terminal"
-import { ChatSession } from "../../global/classes/ChatSession"
 import cuid from "cuid"
 import { makeStreamCompletion } from "../../providers/deepseek/makeStreamCompletion"
 import { sendChatFinal } from "./sendChatFInal"
@@ -24,7 +23,7 @@ async function beforeSendCallback(config: any, messages: any[]) {
   let userMessages = getUserMessages(transformedMessages, history)
   let systemMessages = getSystemMessages(transformedMessages, history)
   let userPrompt = generateUserPrompt(systemMessages, userMessages)
-  // console.log({ messages, transformedMessages, userMessages, systemMessages, userPrompt })
+  console.log({ messages, transformedMessages, userMessages, systemMessages, userPrompt })
 
   return {
     chatId,
@@ -40,15 +39,10 @@ async function afterSendCallback(config: any, messages: any[], assistantMessage:
 }
 async function main() {
   marked.use(markedTerminal())
-  // console.log(chatList)
-  // return
   if (true) {
-    // const chatSession = await ChatSession.getInstance(cuid())
-
     const systemMsg = `Jawab dengan bahasa gaul dan santai.`
 
     const chatHistoryFile = "chat-history.json"
-    // saveJsonFile(chatHistoryFile, [])
 
     let history = await loadJsonFile(chatHistoryFile)
 
@@ -56,24 +50,10 @@ async function main() {
       input: process.stdin,
       output: process.stdout,
     })
-    let lastMessageDisplayed = false
     const config = {
-      chatId: "cmiafxj0m0001i4td0p1o0736",
+      chatId: cuid(),
     }
     while (true) {
-      // if (!lastMessageDisplayed) {
-      //   const lastAssistantMessage = history.filter(
-      //     (m) => m.role === "assistant"
-      //   )
-      //   if (lastAssistantMessage.length > 0) {
-      //     console.log(
-      //       marked(
-      //         `\n Last Message:\n${lastAssistantMessage[lastAssistantMessage.length - 1].content}`
-      //       )
-      //     )
-      //   }
-      //   lastMessageDisplayed = true
-      // }
       const currentQuery = await new Promise<string>((resolve) => {
         rl.question("You: ", (input) => {
           resolve(input)
@@ -92,11 +72,8 @@ async function main() {
       if (!chatResponse) {
         return
       }
-      // spinner.stop()
       if (chatResponse.ok) {
-        // console.log(chatResponse)
         const chunks = makeStreamCompletion(chatResponse)
-        // Define type for the expected chunk structure
         interface StreamChunk {
           choices?: Array<{
             delta: {
