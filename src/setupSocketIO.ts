@@ -1,11 +1,7 @@
 import { Server as SocketIOServer } from "socket.io"
 import type { Socket } from "socket.io"
 import type { Server as HttpServer } from "http"
-import {
-  getSocketConnectionIds,
-  setSocketAppName,
-  updateSocketConnectionIds,
-} from "./db/msocket"
+import { getSocketConnectionIds, setSocketAppName, updateSocketConnectionIds } from "./db/msocket"
 import { ChatAnswerHandler } from "./global/classes/ChatAnswerHandler"
 
 // Define the type for our messages
@@ -34,10 +30,7 @@ const sendHeartbeats = async (io: any) => {
 }
 let ioInstance: any = null
 
-export function setupSocketIO(
-  server: HttpServer,
-  chatHandlerAnswer: ChatAnswerHandler
-): SocketIOServer {
+export function setupSocketIO(server: HttpServer, chatHandlerAnswer: ChatAnswerHandler): SocketIOServer {
   const io = new SocketIOServer(server, {
     cors: {
       origin: "*", // In production, specify your allowed origins
@@ -57,10 +50,14 @@ export function setupSocketIO(
       const { requestId } = data
       if (requestId) chatHandlerAnswer.notifyAnswer(socket.id, requestId, data)
     })
+    socket.on("return-chat-id", (data) => {
+      // console.log(data)
+      // const { requestId } = data
+      chatHandlerAnswer.notifyAnswerKey("return-chat-id", data)
+    })
     socket.on("message", (data) => {
       try {
-        const message: Message =
-          typeof data === "string" ? JSON.parse(data) : data
+        const message: Message = typeof data === "string" ? JSON.parse(data) : data
         switch (message.type) {
           case "ping":
             socket.emit("message", { type: "pong", timestamp: Date.now() })
@@ -73,12 +70,7 @@ export function setupSocketIO(
 
     // Handle client disconnect
     socket.on("disconnect", (reason) => {
-      console.log(
-        "Socket.IO client disconnected:",
-        socket.id,
-        "reason:",
-        reason
-      )
+      console.log("Socket.IO client disconnected:", socket.id, "reason:", reason)
       updateSocketConnectionIds(socket.id, "out")
     })
 

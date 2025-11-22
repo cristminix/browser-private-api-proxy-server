@@ -57,7 +57,33 @@ app.post("/chat", async (c: Context) => {
   // console.log(data)
   return c.json(data)
 })
+app.get("/get-current-chat", async (c: Context) => {
+  const platform = c.req.query("platform") || "deepseek"
+  let data: any = { success: false }
+  const requestId = cuid()
+  let appName = "zai-proxy" //? "zai-proxy" : "mistral-proxy"
+  if (platform === "z.ai") {
+    appName = "zai-proxy"
+  } else if (platform === "mistral.ai") {
+    appName = "mistral-proxy"
+  } else if (platform === "deepseek") {
+    appName = "deepseek-proxy"
+  }
+  const socket = await emitSocket(ioInstance, appName, "get-current-chat", {
+    payload: {},
+    requestId,
+  })
+  if (socket) {
+    console.log(socket.id)
+    // await setSocketBusy(socket.id)
 
+    data = await chatHandlerAnswer.waitForAnswerKey("return-chat-id")
+    // await unsetSocketBusy(socket.id)
+  }
+
+  // console.log(data)
+  return c.json(data)
+})
 app.get("/reload-chat", async (c: Context) => {
   const platform = c.req.query("platform") || "z.ai"
   const appName = platform === "z.ai" ? "zai-proxy" : "mistral-proxy"

@@ -26,9 +26,26 @@ class ChatAnswerHandler extends EventEmitter {
       this.once(`answer_${socketId}_${requestId}`, answerHandler)
     })
   }
+  waitForAnswerKey(key: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        this.removeListener(`${key}`, answerHandler)
+        reject(new Error("Timeout"))
+      }, 60000)
 
+      const answerHandler = (data: any) => {
+        clearTimeout(timeout)
+        resolve(data)
+      }
+
+      this.once(`${key}`, answerHandler)
+    })
+  }
   notifyAnswer(socketId: string, requestId: string, data: any) {
     this.emit(`answer_${socketId}_${requestId}`, data)
+  }
+  notifyAnswerKey(key: string, data: any) {
+    this.emit(`${key}`, data)
   }
 }
 export { ChatAnswerHandler }

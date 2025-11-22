@@ -14,11 +14,22 @@ import { getSystemMessages } from "./chat-history/getSystemMessages"
 import { generateUserPrompt } from "./chat-history/generateUserPrompt"
 import { saveJsonFile } from "../../global/fn/saveJsonFile"
 import { saveChatHistory } from "./chat-history/saveChatHistory"
-
+import { updateTmpChat } from "./chat-history/updateTmpChat"
+async function getCurrentChatId() {
+  try {
+    const response = await fetch("http://localhost:4001/api/get-current-chat?platform=deepseek")
+    const data = await response.json()
+    if (data) {
+      const { chatId } = data
+      return chatId
+    }
+  } catch (error) {}
+  return null
+}
 async function beforeSendCallback(config: any, messages: any[]) {
   const chatHistoryDir = "src/examples/chat-history"
-  const { chatId } = config
-  let history = await loadChatHistory(chatHistoryDir, chatId)
+  const { chatId, tmpChatId, firstTime } = config
+  let history = await loadChatHistory(chatHistoryDir, firstTime ? tmpChatId : chatId)
   let transformedMessages = transformMessages(messages)
   let userMessages = getUserMessages(transformedMessages, history)
   let systemMessages = getSystemMessages(transformedMessages, history)
@@ -32,9 +43,9 @@ async function beforeSendCallback(config: any, messages: any[]) {
 }
 async function afterSendCallback(config: any, messages: any[], assistantMessage: any) {
   const chatHistoryDir = "src/examples/chat-history"
-  const { chatId } = config
+  const { chatId, firstTime, tmpChatId } = config
   const history = [...messages, assistantMessage]
-  await saveChatHistory(chatHistoryDir, chatId, history)
+  await saveChatHistory(chatHistoryDir, firstTime ? tmpChatId : chatId, history)
   return history
 }
 async function main() {
@@ -45,15 +56,27 @@ async function main() {
     const chatHistoryFile = "chat-history.json"
 
     let history = await loadJsonFile(chatHistoryFile)
-
+    const tmpChatId = cuid()
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
     })
     const config = {
-      chatId: cuid(),
+      chatId: await getCurrentChatId(),
+      tmpChatId,
+      firstTime: true,
+    }
+    if (config.chatId) {
+      config.firstTime = false
     }
     while (true) {
+      if (!config.chatId) {
+        const chatHistoryDir = "src/examples/chat-history"
+
+        config.chatId = await getCurrentChatId()
+        config.firstTime = false
+        updateTmpChat(chatHistoryDir, config)
+      }
       const currentQuery = await new Promise<string>((resolve) => {
         rl.question("You: ", (input) => {
           resolve(input)
