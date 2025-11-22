@@ -2,8 +2,9 @@ export function getUserMessages(messages: any[], history: any[]) {
   //   const systemMessages = messages.filter((m) => m.role === "system")
   let userMessages: any[] = []
   if (Array.isArray(history)) {
-    if (history.length > messages.length) {
-      userMessages = messages.slice(history.length)
+    if (history.length > 0) {
+      userMessages = messages.slice(history.length - 1)
+      return userMessages
     }
   }
 

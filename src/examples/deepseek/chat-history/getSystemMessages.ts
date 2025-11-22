@@ -2,8 +2,9 @@ export function getSystemMessages(messages: any[], history: any[]) {
   //   const systemMessages = messages.filter((m) => m.role === "system")
   let systemMessages: any[] = []
   if (Array.isArray(history)) {
-    if (history.length > messages.length) {
+    if (history.length > 0) {
       systemMessages = []
+      return systemMessages
     }
   }
 

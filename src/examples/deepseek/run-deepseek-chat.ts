@@ -4,25 +4,31 @@ import { marked } from "marked"
 import { markedTerminal } from "marked-terminal"
 import { ChatSession } from "../../global/classes/ChatSession"
 import cuid from "cuid"
-import { makeStreamCompletion } from "src/providers/deepseek/makeStreamCompletion"
+import { makeStreamCompletion } from "../../providers/deepseek/makeStreamCompletion"
 import { sendChatFinal } from "./sendChatFInal"
+import { loadJsonFile } from "../../global/fn/loadJsonFile"
+import { DeepSeekChatPayload } from "../../providers/deepseek/types"
+import { loadChatHistory } from "./chat-history/loadChatHistory"
+import { transformMessages } from "src/providers/deepseek/transformRequestMessages"
+import { getUserMessages } from "./chat-history/getUserMessages"
+import { getSystemMessages } from "./chat-history/getSystemMessages"
+import { generateUserPrompt } from "./chat-history/generateUserPrompt"
+import { saveJsonFile } from "../../global/fn/saveJsonFile"
 
-function generateSession() {
-  // console.log(headers)
-  // Create a session ID based on specific header values
-  const headerValues = new Date().toString()
+async function beforeSendCallback(config: any, messages: any[]) {
+  const chatHistoryDir = "src/examples/chat-history"
+  const { chatId } = config
+  let history = await loadChatHistory(chatHistoryDir, chatId)
+  let transformedMessages = transformMessages(messages)
+  let userMessages = getUserMessages(transformedMessages, history)
+  let systemMessages = getSystemMessages(transformedMessages, history)
+  let userPrompt = generateUserPrompt(systemMessages, userMessages)
+  // console.log({ messages, transformedMessages, userMessages, systemMessages, userPrompt })
 
-  // Create a simple hash of the header values to use as session ID
-  let hash = 0
-  for (let i = 0; i < headerValues.length; i++) {
-    const char = headerValues.charCodeAt(i)
-    hash = (hash << 5) - hash + char
-    hash = hash & hash // Convert to 32-bit integer
+  return {
+    chatId,
+    userPrompt,
   }
-
-  const sessionId = Math.abs(hash).toString(36)
-  console.log("Generated session ID:", sessionId)
-  return sessionId
 }
 async function main() {
   marked.use(markedTerminal())
@@ -33,14 +39,19 @@ async function main() {
 
     const systemMsg = `Jawab dengan bahasa gaul dan santai.`
 
-    // const chatHistoryFile = "chat-history.json"
-    // let history = loadJsonFile(chatHistoryFile)
+    const chatHistoryFile = "chat-history.json"
+    saveJsonFile(chatHistoryFile, [])
+
+    let history = await loadJsonFile(chatHistoryFile)
 
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
     })
     let lastMessageDisplayed = false
+    const config = {
+      chatId: cuid(),
+    }
     while (true) {
       // if (!lastMessageDisplayed) {
       //   const lastAssistantMessage = history.filter(
@@ -95,14 +106,8 @@ async function main() {
           chatSession?.insertAssistantMessage(message.content, message.id)
         },
       }
-      const chatResponse = await sendChatFinal(
-        [
-          { role: "system", content: systemMsg },
-          // ...history,
-          { role: "user", content: currentQuery },
-        ],
-        chatSession
-      )
+
+      const chatResponse = await sendChatFinal([{ role: "system", content: systemMsg }, ...history, { role: "user", content: currentQuery }], beforeSendCallback, config)
       if (!chatResponse) {
         return
       }
@@ -136,17 +141,17 @@ async function main() {
           }
         }
 
-        // history.push({
-        //   role: "user",
-        //   content: currentQuery,
-        // })
+        history.push({
+          role: "user",
+          content: currentQuery,
+        })
 
-        // history.push({
-        //   role: "assistant",
-        //   content: outputBuffer_content,
-        // })
+        history.push({
+          role: "assistant",
+          content: outputBuffer_content,
+        })
 
-        // saveJsonFile(chatHistoryFile, history)
+        saveJsonFile(chatHistoryFile, history)
 
         console.log(``)
       }
