@@ -1,0 +1,2021 @@
+event: ready
+data: {"request_message_id":7,"response_message_id":8}
+
+event: update_session
+data: {"updated_at":1763778765.669429}
+
+data: {"v": {"response": {"message_id": 8, "parent_id": 7, "model": "", "role": "ASSISTANT", "thinking_enabled": false, "ban_edit": false, "ban_regenerate": false, "status": "WIP", "accumulated_token_usage": null, "files": [], "inserted_at": 1763778765.647, "search_enabled": false, "feedback": null, "has_pending_fragment": true, "auto_continue": false, "conversation_mode": "DEFAULT", "fragments": []}}}
+
+data: {"v": [{"v": false, "p": "has_pending_fragment"}, {"v": [{"id": 1, "type": "RESPONSE", "content": "Of", "references": [], "stage_id": 1}], "p": "fragments", "o": "APPEND"}], "p": "response", "o": "BATCH"}
+
+data: {"v": " course", "p": "response/fragments/0/content", "o": "APPEND"}
+
+data: {"v": "!"}
+
+data: {"v": " Here"}
+
+data: {"v": " is"}
+
+data: {"v": " a"}
+
+data: {"v": " global"}
+
+data: {"v": " tour"}
+
+data: {"v": " of"}
+
+data: {"v": " highly"}
+
+data: {"v": " recommended"}
+
+data: {"v": " destinations"}
+
+data: {"v": ","}
+
+data: {"v": " known"}
+
+data: {"v": " for"}
+
+data: {"v": " their"}
+
+data: {"v": " unique"}
+
+data: {"v": " beauty"}
+
+data: {"v": ","}
+
+data: {"v": " culture"}
+
+data: {"v": ","}
+
+data: {"v": " and"}
+
+data: {"v": " unforgettable"}
+
+data: {"v": " experiences"}
+
+data: {"v": ".\n\n"}
+
+data: {"v": "###"}
+
+data: {"v": " 🏛"}
+
+data: {"v": "️"}
+
+data: {"v": " For"}
+
+data: {"v": " History"}
+
+data: {"v": " &"}
+
+data: {"v": " Ancient"}
+
+data: {"v": " Wonders"}
+
+data: {"v": "\n\n"}
+
+data: {"v": "1"}
+
+data: {"v": "."}
+
+data: {"v": " "}
+
+data: {"v": " **"}
+
+data: {"v": "Rome"}
+
+data: {"v": ","}
+
+data: {"v": " Italy"}
+
+data: {"v": ":**"}
+
+data: {"v": " Walk"}
+
+data: {"v": " through"}
+
+data: {"v": " millennia"}
+
+data: {"v": " of"}
+
+data: {"v": " history"}
+
+data: {"v": " at"}
+
+data: {"v": " the"}
+
+data: {"v": " Col"}
+
+data: {"v": "osse"}
+
+data: {"v": "um"}
+
+data: {"v": ","}
+
+data: {"v": " Roman"}
+
+data: {"v": " Forum"}
+
+data: {"v": ","}
+
+data: {"v": " and"}
+
+data: {"v": " Pant"}
+
+data: {"v": "heon"}
+
+data: {"v": "."}
+
+data: {"v": " The"}
+
+data: {"v": " entire"}
+
+data: {"v": " city"}
+
+data: {"v": " is"}
+
+data: {"v": " an"}
+
+data: {"v": " open"}
+
+data: {"v": "-air"}
+
+data: {"v": " museum"}
+
+data: {"v": ".\n"}
+
+data: {"v": "2"}
+
+data: {"v": "."}
+
+data: {"v": " "}
+
+data: {"v": " **"}
+
+data: {"v": "Pet"}
+
+data: {"v": "ra"}
+
+data: {"v": ","}
+
+data: {"v": " Jordan"}
+
+data: {"v": ":**"}
+
+data: {"v": " The"}
+
+data: {"v": " \""}
+
+data: {"v": "Rose"}
+
+data: {"v": " City"}
+
+data: {"v": "\""}
+
+data: {"v": " carved"}
+
+data: {"v": " into"}
+
+data: {"v": " crimson"}
+
+data: {"v": " sandstone"}
+
+data: {"v": " cliffs"}
+
+data: {"v": "."}
+
+data: {"v": " The"}
+
+data: {"v": " walk"}
+
+data: {"v": " through"}
+
+data: {"v": " the"}
+
+data: {"v": " Si"}
+
+data: {"v": "q"}
+
+data: {"v": " to"}
+
+data: {"v": " reveal"}
+
+data: {"v": " the"}
+
+data: {"v": " Treasury"}
+
+data: {"v": " is"}
+
+data: {"v": " legendary"}
+
+data: {"v": ".\n"}
+
+data: {"v": "3"}
+
+data: {"v": "."}
+
+data: {"v": " "}
+
+data: {"v": " **"}
+
+data: {"v": "Mach"}
+
+data: {"v": "u"}
+
+data: {"v": " Pic"}
+
+data: {"v": "chu"}
+
+data: {"v": ","}
+
+data: {"v": " Peru"}
+
+data: {"v": ":**"}
+
+data: {"v": " This"}
+
+data: {"v": " Inc"}
+
+data: {"v": "an"}
+
+data: {"v": " cit"}
+
+data: {"v": "adel"}
+
+data: {"v": " perched"}
+
+data: {"v": " high"}
+
+data: {"v": " in"}
+
+data: {"v": " the"}
+
+data: {"v": " Andes"}
+
+data: {"v": " is"}
+
+data: {"v": " an"}
+
+data: {"v": " architectural"}
+
+data: {"v": " and"}
+
+data: {"v": " spiritual"}
+
+data: {"v": " marvel"}
+
+data: {"v": ","}
+
+data: {"v": " often"}
+
+data: {"v": " shrou"}
+
+data: {"v": "ded"}
+
+data: {"v": " in"}
+
+data: {"v": " mist"}
+
+data: {"v": ".\n"}
+
+data: {"v": "4"}
+
+data: {"v": "."}
+
+data: {"v": " "}
+
+data: {"v": " **"}
+
+data: {"v": "Ang"}
+
+data: {"v": "kor"}
+
+data: {"v": " Wat"}
+
+data: {"v": ","}
+
+data: {"v": " Cambodia"}
+
+data: {"v": ":**"}
+
+data: {"v": " The"}
+
+data: {"v": " world"}
+
+data: {"v": "'s"}
+
+data: {"v": " largest"}
+
+data: {"v": " religious"}
+
+data: {"v": " monument"}
+
+data: {"v": "."}
+
+data: {"v": " Explore"}
+
+data: {"v": " the"}
+
+data: {"v": " vast"}
+
+data: {"v": " temple"}
+
+data: {"v": " complex"}
+
+data: {"v": ","}
+
+data: {"v": " from"}
+
+data: {"v": " the"}
+
+data: {"v": " iconic"}
+
+data: {"v": " sunrise"}
+
+data: {"v": " at"}
+
+data: {"v": " Ang"}
+
+data: {"v": "kor"}
+
+data: {"v": " Wat"}
+
+data: {"v": " to"}
+
+data: {"v": " the"}
+
+data: {"v": " jungle"}
+
+data: {"v": "-covered"}
+
+data: {"v": " Ta"}
+
+data: {"v": " Pro"}
+
+data: {"v": "hm"}
+
+data: {"v": ".\n"}
+
+data: {"v": "5"}
+
+data: {"v": "."}
+
+data: {"v": " "}
+
+data: {"v": " **"}
+
+data: {"v": "C"}
+
+data: {"v": "airo"}
+
+data: {"v": " &"}
+
+data: {"v": " the"}
+
+data: {"v": " Nile"}
+
+data: {"v": " Valley"}
+
+data: {"v": ","}
+
+data: {"v": " Egypt"}
+
+data: {"v": ":**"}
+
+data: {"v": " Stand"}
+
+data: {"v": " before"}
+
+data: {"v": " the"}
+
+data: {"v": " Py"}
+
+data: {"v": "ram"}
+
+data: {"v": "ids"}
+
+data: {"v": " of"}
+
+data: {"v": " G"}
+
+data: {"v": "iza"}
+
+data: {"v": " and"}
+
+data: {"v": " the"}
+
+data: {"v": " S"}
+
+data: {"v": "phinx"}
+
+data: {"v": ","}
+
+data: {"v": " then"}
+
+data: {"v": " explore"}
+
+data: {"v": " the"}
+
+data: {"v": " incredible"}
+
+data: {"v": " tombs"}
+
+data: {"v": " and"}
+
+data: {"v": " temples"}
+
+data: {"v": " in"}
+
+data: {"v": " Lux"}
+
+data: {"v": "or"}
+
+data: {"v": " and"}
+
+data: {"v": " the"}
+
+data: {"v": " Valley"}
+
+data: {"v": " of"}
+
+data: {"v": " the"}
+
+data: {"v": " Kings"}
+
+data: {"v": ".\n\n"}
+
+data: {"v": "###"}
+
+data: {"v": " 🏞"}
+
+data: {"v": "️"}
+
+data: {"v": " For"}
+
+data: {"v": " Epic"}
+
+data: {"v": " Natural"}
+
+data: {"v": " Beauty"}
+
+data: {"v": " &"}
+
+data: {"v": " Adventure"}
+
+data: {"v": "\n\n"}
+
+data: {"v": "1"}
+
+data: {"v": "."}
+
+data: {"v": " "}
+
+data: {"v": " **"}
+
+data: {"v": "Pat"}
+
+data: {"v": "agon"}
+
+data: {"v": "ia"}
+
+data: {"v": " ("}
+
+data: {"v": "Ch"}
+
+data: {"v": "ile"}
+
+data: {"v": " &"}
+
+data: {"v": " Argentina"}
+
+data: {"v": "):"}
+
+data: {"v": "**"}
+
+data: {"v": " A"}
+
+data: {"v": " land"}
+
+data: {"v": " of"}
+
+data: {"v": " raw"}
+
+data: {"v": ","}
+
+data: {"v": " unt"}
+
+data: {"v": "amed"}
+
+data: {"v": " wilderness"}
+
+data: {"v": "."}
+
+data: {"v": " Trek"}
+
+data: {"v": " past"}
+
+data: {"v": " glaciers"}
+
+data: {"v": ","}
+
+data: {"v": " the"}
+
+data: {"v": " jag"}
+
+data: {"v": "ged"}
+
+data: {"v": " peaks"}
+
+data: {"v": " of"}
+
+data: {"v": " Torres"}
+
+data: {"v": " del"}
+
+data: {"v": " Paine"}
+
+data: {"v": ","}
+
+data: {"v": " and"}
+
+data: {"v": " the"}
+
+data: {"v": " Fitz"}
+
+data: {"v": " Roy"}
+
+data: {"v": " range"}
+
+data: {"v": ".\n"}
+
+data: {"v": "2"}
+
+data: {"v": "."}
+
+data: {"v": " "}
+
+data: {"v": " **"}
+
+data: {"v": "The"}
+
+data: {"v": " Norwegian"}
+
+data: {"v": " Fj"}
+
+data: {"v": "ords"}
+
+data: {"v": " ("}
+
+data: {"v": "Nor"}
+
+data: {"v": "way"}
+
+data: {"v": "):"}
+
+data: {"v": "**"}
+
+data: {"v": " Sail"}
+
+data: {"v": " past"}
+
+data: {"v": " dramatic"}
+
+data: {"v": ","}
+
+data: {"v": " deep"}
+
+data: {"v": "-blue"}
+
+data: {"v": " waterways"}
+
+data: {"v": " surrounded"}
+
+data: {"v": " by"}
+
+data: {"v": " sheer"}
+
+data: {"v": " cliffs"}
+
+data: {"v": " and"}
+
+data: {"v": " waterfalls"}
+
+data: {"v": "."}
+
+data: {"v": " Ge"}
+
+data: {"v": "ir"}
+
+data: {"v": "anger"}
+
+data: {"v": "fj"}
+
+data: {"v": "ord"}
+
+data: {"v": " is"}
+
+data: {"v": " a"}
+
+data: {"v": " UNESCO"}
+
+data: {"v": " standout"}
+
+data: {"v": ".\n"}
+
+data: {"v": "3"}
+
+data: {"v": "."}
+
+data: {"v": " "}
+
+data: {"v": " **"}
+
+data: {"v": "New"}
+
+data: {"v": " Zealand"}
+
+data: {"v": " ("}
+
+data: {"v": "South"}
+
+data: {"v": " Island"}
+
+data: {"v": "):"}
+
+data: {"v": "**"}
+
+data: {"v": " A"}
+
+data: {"v": " playground"}
+
+data: {"v": " for"}
+
+data: {"v": " adventure"}
+
+data: {"v": " and"}
+
+data: {"v": " scenery"}
+
+data: {"v": "."}
+
+data: {"v": " From"}
+
+data: {"v": " the"}
+
+data: {"v": " fj"}
+
+data: {"v": "ords"}
+
+data: {"v": " of"}
+
+data: {"v": " Mil"}
+
+data: {"v": "ford"}
+
+data: {"v": " Sound"}
+
+data: {"v": " to"}
+
+data: {"v": " the"}
+
+data: {"v": " glaciers"}
+
+data: {"v": " and"}
+
+data: {"v": " dark"}
+
+data: {"v": " sky"}
+
+data: {"v": " reserves"}
+
+data: {"v": ","}
+
+data: {"v": " it"}
+
+data: {"v": "'s"}
+
+data: {"v": " breathtaking"}
+
+data: {"v": ".\n"}
+
+data: {"v": "4"}
+
+data: {"v": "."}
+
+data: {"v": " "}
+
+data: {"v": " **"}
+
+data: {"v": "Ban"}
+
+data: {"v": "ff"}
+
+data: {"v": " &"}
+
+data: {"v": " Jasper"}
+
+data: {"v": " National"}
+
+data: {"v": " Parks"}
+
+data: {"v": " ("}
+
+data: {"v": "Canada"}
+
+data: {"v": "):"}
+
+data: {"v": "**"}
+
+data: {"v": " The"}
+
+data: {"v": " iconic"}
+
+data: {"v": " tur"}
+
+data: {"v": "quoise"}
+
+data: {"v": " lakes"}
+
+data: {"v": " of"}
+
+data: {"v": " Lake"}
+
+data: {"v": " Louise"}
+
+data: {"v": " and"}
+
+data: {"v": " Mor"}
+
+data: {"v": "aine"}
+
+data: {"v": " Lake"}
+
+data: {"v": " set"}
+
+data: {"v": " against"}
+
+data: {"v": " the"}
+
+data: {"v": " backdrop"}
+
+data: {"v": " of"}
+
+data: {"v": " the"}
+
+data: {"v": " Canadian"}
+
+data: {"v": " Rockies"}
+
+data: {"v": ".\n"}
+
+data: {"v": "5"}
+
+data: {"v": "."}
+
+data: {"v": " "}
+
+data: {"v": " **"}
+
+data: {"v": "The"}
+
+data: {"v": " Great"}
+
+data: {"v": " Barrier"}
+
+data: {"v": " Reef"}
+
+data: {"v": ","}
+
+data: {"v": " Australia"}
+
+data: {"v": ":**"}
+
+data: {"v": " The"}
+
+data: {"v": " world"}
+
+data: {"v": "'s"}
+
+data: {"v": " largest"}
+
+data: {"v": " coral"}
+
+data: {"v": " reef"}
+
+data: {"v": " system"}
+
+data: {"v": ","}
+
+data: {"v": " a"}
+
+data: {"v": " kale"}
+
+data: {"v": "id"}
+
+data: {"v": "oscope"}
+
+data: {"v": " of"}
+
+data: {"v": " marine"}
+
+data: {"v": " life"}
+
+data: {"v": " perfect"}
+
+data: {"v": " for"}
+
+data: {"v": " snork"}
+
+data: {"v": "eling"}
+
+data: {"v": " and"}
+
+data: {"v": " diving"}
+
+data: {"v": ".\n\n"}
+
+data: {"v": "###"}
+
+data: {"v": " 🏙"}
+
+data: {"v": "️"}
+
+data: {"v": " For"}
+
+data: {"v": " Icon"}
+
+data: {"v": "ic"}
+
+data: {"v": " City"}
+
+data: {"v": "scapes"}
+
+data: {"v": " &"}
+
+data: {"v": " Culture"}
+
+data: {"v": "\n\n"}
+
+data: {"v": "1"}
+
+data: {"v": "."}
+
+data: {"v": " "}
+
+data: {"v": " **"}
+
+data: {"v": "Ky"}
+
+data: {"v": "oto"}
+
+data: {"v": ","}
+
+data: {"v": " Japan"}
+
+data: {"v": ":**"}
+
+data: {"v": " The"}
+
+data: {"v": " soul"}
+
+data: {"v": " of"}
+
+data: {"v": " traditional"}
+
+data: {"v": " Japan"}
+
+data: {"v": "."}
+
+data: {"v": " Thousands"}
+
+data: {"v": " of"}
+
+data: {"v": " temples"}
+
+data: {"v": ","}
+
+data: {"v": " serene"}
+
+data: {"v": " Zen"}
+
+data: {"v": " gardens"}
+
+data: {"v": ","}
+
+data: {"v": " and"}
+
+data: {"v": " the"}
+
+data: {"v": " chance"}
+
+data: {"v": " to"}
+
+data: {"v": " see"}
+
+data: {"v": " ge"}
+
+data: {"v": "isha"}
+
+data: {"v": " in"}
+
+data: {"v": " the"}
+
+data: {"v": " G"}
+
+data: {"v": "ion"}
+
+data: {"v": " district"}
+
+data: {"v": ".\n"}
+
+data: {"v": "2"}
+
+data: {"v": "."}
+
+data: {"v": " "}
+
+data: {"v": " **"}
+
+data: {"v": "I"}
+
+data: {"v": "stanbul"}
+
+data: {"v": ","}
+
+data: {"v": " Turkey"}
+
+data: {"v": ":**"}
+
+data: {"v": " Where"}
+
+data: {"v": " East"}
+
+data: {"v": " meets"}
+
+data: {"v": " West"}
+
+data: {"v": "."}
+
+data: {"v": " Marvel"}
+
+data: {"v": " at"}
+
+data: {"v": " the"}
+
+data: {"v": " Hag"}
+
+data: {"v": "ia"}
+
+data: {"v": " Sophia"}
+
+data: {"v": ","}
+
+data: {"v": " shop"}
+
+data: {"v": " the"}
+
+data: {"v": " Grand"}
+
+data: {"v": " B"}
+
+data: {"v": "azaar"}
+
+data: {"v": ","}
+
+data: {"v": " and"}
+
+data: {"v": " cruise"}
+
+data: {"v": " the"}
+
+data: {"v": " B"}
+
+data: {"v": "osph"}
+
+data: {"v": "orus"}
+
+data: {"v": " Strait"}
+
+data: {"v": ".\n"}
+
+data: {"v": "3"}
+
+data: {"v": "."}
+
+data: {"v": " "}
+
+data: {"v": " **"}
+
+data: {"v": "New"}
+
+data: {"v": " York"}
+
+data: {"v": " City"}
+
+data: {"v": ","}
+
+data: {"v": " USA"}
+
+data: {"v": ":**"}
+
+data: {"v": " The"}
+
+data: {"v": " electric"}
+
+data: {"v": " energy"}
+
+data: {"v": " of"}
+
+data: {"v": " Broadway"}
+
+data: {"v": ","}
+
+data: {"v": " Central"}
+
+data: {"v": " Park"}
+
+data: {"v": ","}
+
+data: {"v": " world"}
+
+data: {"v": "-class"}
+
+data: {"v": " museums"}
+
+data: {"v": ","}
+
+data: {"v": " and"}
+
+data: {"v": " an"}
+
+data: {"v": " iconic"}
+
+data: {"v": " sky"}
+
+data: {"v": "line"}
+
+data: {"v": ".\n"}
+
+data: {"v": "4"}
+
+data: {"v": "."}
+
+data: {"v": " "}
+
+data: {"v": " **"}
+
+data: {"v": "Paris"}
+
+data: {"v": ","}
+
+data: {"v": " France"}
+
+data: {"v": ":**"}
+
+data: {"v": " The"}
+
+data: {"v": " \""}
+
+data: {"v": "City"}
+
+data: {"v": " of"}
+
+data: {"v": " Light"}
+
+data: {"v": "\""}
+
+data: {"v": " ench"}
+
+data: {"v": "ants"}
+
+data: {"v": " with"}
+
+data: {"v": " the"}
+
+data: {"v": " E"}
+
+data: {"v": "iff"}
+
+data: {"v": "el"}
+
+data: {"v": " Tower"}
+
+data: {"v": ","}
+
+data: {"v": " Louvre"}
+
+data: {"v": ","}
+
+data: {"v": " charming"}
+
+data: {"v": " cafes"}
+
+data: {"v": ","}
+
+data: {"v": " and"}
+
+data: {"v": " an"}
+
+data: {"v": " unparalleled"}
+
+data: {"v": " artistic"}
+
+data: {"v": " atmosphere"}
+
+data: {"v": ".\n"}
+
+data: {"v": "5"}
+
+data: {"v": "."}
+
+data: {"v": " "}
+
+data: {"v": " **"}
+
+data: {"v": "C"}
+
+data: {"v": "ape"}
+
+data: {"v": " Town"}
+
+data: {"v": ","}
+
+data: {"v": " South"}
+
+data: {"v": " Africa"}
+
+data: {"v": ":**"}
+
+data: {"v": " A"}
+
+data: {"v": " stunning"}
+
+data: {"v": " natural"}
+
+data: {"v": " setting"}
+
+data: {"v": " with"}
+
+data: {"v": " Table"}
+
+data: {"v": " Mountain"}
+
+data: {"v": ","}
+
+data: {"v": " pristine"}
+
+data: {"v": " beaches"}
+
+data: {"v": ","}
+
+data: {"v": " peng"}
+
+data: {"v": "uin"}
+
+data: {"v": " colonies"}
+
+data: {"v": ","}
+
+data: {"v": " and"}
+
+data: {"v": " renowned"}
+
+data: {"v": " win"}
+
+data: {"v": "el"}
+
+data: {"v": "ands"}
+
+data: {"v": " nearby"}
+
+data: {"v": ".\n\n"}
+
+data: {"v": "###"}
+
+data: {"v": " 🏝"}
+
+data: {"v": "️"}
+
+data: {"v": " For"}
+
+data: {"v": " Beach"}
+
+data: {"v": " &"}
+
+data: {"v": " Island"}
+
+data: {"v": " Paradise"}
+
+data: {"v": "\n\n"}
+
+data: {"v": "1"}
+
+data: {"v": "."}
+
+data: {"v": " "}
+
+data: {"v": " **"}
+
+data: {"v": "The"}
+
+data: {"v": " Mald"}
+
+data: {"v": "ives"}
+
+data: {"v": ":**"}
+
+data: {"v": " The"}
+
+data: {"v": " ultimate"}
+
+data: {"v": " luxury"}
+
+data: {"v": " escape"}
+
+data: {"v": " with"}
+
+data: {"v": " over"}
+
+data: {"v": "water"}
+
+data: {"v": " b"}
+
+data: {"v": "ungal"}
+
+data: {"v": "ows"}
+
+data: {"v": ","}
+
+data: {"v": " powder"}
+
+data: {"v": "-white"}
+
+data: {"v": " sand"}
+
+data: {"v": ","}
+
+data: {"v": " and"}
+
+data: {"v": " crystal"}
+
+data: {"v": "-c"}
+
+data: {"v": "lear"}
+
+data: {"v": " tur"}
+
+data: {"v": "quoise"}
+
+data: {"v": " lago"}
+
+data: {"v": "ons"}
+
+data: {"v": ".\n"}
+
+data: {"v": "2"}
+
+data: {"v": "."}
+
+data: {"v": " "}
+
+data: {"v": " **"}
+
+data: {"v": "S"}
+
+data: {"v": "antor"}
+
+data: {"v": "ini"}
+
+data: {"v": ","}
+
+data: {"v": " Greece"}
+
+data: {"v": ":**"}
+
+data: {"v": " Famous"}
+
+data: {"v": " for"}
+
+data: {"v": " its"}
+
+data: {"v": " white"}
+
+data: {"v": "was"}
+
+data: {"v": "hed"}
+
+data: {"v": " villages"}
+
+data: {"v": ","}
+
+data: {"v": " blue"}
+
+data: {"v": "-d"}
+
+data: {"v": "omed"}
+
+data: {"v": " churches"}
+
+data: {"v": ","}
+
+data: {"v": " and"}
+
+data: {"v": " stunning"}
+
+data: {"v": " sun"}
+
+data: {"v": "sets"}
+
+data: {"v": " over"}
+
+data: {"v": " the"}
+
+data: {"v": " volcanic"}
+
+data: {"v": " cal"}
+
+data: {"v": "dera"}
+
+data: {"v": ".\n"}
+
+data: {"v": "3"}
+
+data: {"v": "."}
+
+data: {"v": " "}
+
+data: {"v": " **"}
+
+data: {"v": "The"}
+
+data: {"v": " Thai"}
+
+data: {"v": " Islands"}
+
+data: {"v": " ("}
+
+data: {"v": "e"}
+
+data: {"v": ".g"}
+
+data: {"v": ".,"}
+
+data: {"v": " Ph"}
+
+data: {"v": "uk"}
+
+data: {"v": "et"}
+
+data: {"v": ","}
+
+data: {"v": " Koh"}
+
+data: {"v": " L"}
+
+data: {"v": "anta"}
+
+data: {"v": ","}
+
+data: {"v": " Rail"}
+
+data: {"v": "ay"}
+
+data: {"v": "):"}
+
+data: {"v": "**"}
+
+data: {"v": " Offers"}
+
+data: {"v": " everything"}
+
+data: {"v": " from"}
+
+data: {"v": " vibrant"}
+
+data: {"v": " parties"}
+
+data: {"v": " to"}
+
+data: {"v": " laid"}
+
+data: {"v": "-back"}
+
+data: {"v": " relaxation"}
+
+data: {"v": ","}
+
+data: {"v": " with"}
+
+data: {"v": " stunning"}
+
+data: {"v": " limestone"}
+
+data: {"v": " kar"}
+
+data: {"v": "sts"}
+
+data: {"v": " and"}
+
+data: {"v": " amazing"}
+
+data: {"v": " food"}
+
+data: {"v": ".\n"}
+
+data: {"v": "4"}
+
+data: {"v": "."}
+
+data: {"v": " "}
+
+data: {"v": " **"}
+
+data: {"v": "The"}
+
+data: {"v": " Am"}
+
+data: {"v": "alf"}
+
+data: {"v": "i"}
+
+data: {"v": " Coast"}
+
+data: {"v": ","}
+
+data: {"v": " Italy"}
+
+data: {"v": ":**"}
+
+data: {"v": " A"}
+
+data: {"v": " dramatic"}
+
+data: {"v": " coastline"}
+
+data: {"v": " of"}
+
+data: {"v": " cliff"}
+
+data: {"v": "side"}
+
+data: {"v": " villages"}
+
+data: {"v": " like"}
+
+data: {"v": " Pos"}
+
+data: {"v": "it"}
+
+data: {"v": "ano"}
+
+data: {"v": " and"}
+
+data: {"v": " Am"}
+
+data: {"v": "alf"}
+
+data: {"v": "i"}
+
+data: {"v": ","}
+
+data: {"v": " colorful"}
+
+data: {"v": " architecture"}
+
+data: {"v": ","}
+
+data: {"v": " and"}
+
+data: {"v": " delicious"}
+
+data: {"v": " Italian"}
+
+data: {"v": " cuisine"}
+
+data: {"v": ".\n\n"}
+
+data: {"v": "###"}
+
+data: {"v": " 🛕"}
+
+data: {"v": " For"}
+
+data: {"v": " Unique"}
+
+data: {"v": " Cultural"}
+
+data: {"v": " Imm"}
+
+data: {"v": "ersion"}
+
+data: {"v": "\n\n"}
+
+data: {"v": "1"}
+
+data: {"v": "."}
+
+data: {"v": " "}
+
+data: {"v": " **"}
+
+data: {"v": "Mar"}
+
+data: {"v": "rake"}
+
+data: {"v": "ch"}
+
+data: {"v": ","}
+
+data: {"v": " Morocco"}
+
+data: {"v": ":**"}
+
+data: {"v": " A"}
+
+data: {"v": " sensory"}
+
+data: {"v": " explosion"}
+
+data: {"v": " in"}
+
+data: {"v": " its"}
+
+data: {"v": " bustling"}
+
+data: {"v": " med"}
+
+data: {"v": "ina"}
+
+data: {"v": ","}
+
+data: {"v": " vibrant"}
+
+data: {"v": " sou"}
+
+data: {"v": "ks"}
+
+data: {"v": ","}
+
+data: {"v": " and"}
+
+data: {"v": " the"}
+
+data: {"v": " magical"}
+
+data: {"v": " D"}
+
+data: {"v": "jem"}
+
+data: {"v": "aa"}
+
+data: {"v": " el"}
+
+data: {"v": "-F"}
+
+data: {"v": "na"}
+
+data: {"v": " square"}
+
+data: {"v": ".\n"}
+
+data: {"v": "2"}
+
+data: {"v": "."}
+
+data: {"v": " "}
+
+data: {"v": " **"}
+
+data: {"v": "V"}
+
+data: {"v": "aran"}
+
+data: {"v": "asi"}
+
+data: {"v": ","}
+
+data: {"v": " India"}
+
+data: {"v": ":**"}
+
+data: {"v": " One"}
+
+data: {"v": " of"}
+
+data: {"v": " the"}
+
+data: {"v": " world"}
+
+data: {"v": "'s"}
+
+data: {"v": " oldest"}
+
+data: {"v": " living"}
+
+data: {"v": " cities"}
+
+data: {"v": "."}
+
+data: {"v": " Witness"}
+
+data: {"v": " ancient"}
+
+data: {"v": " Hindu"}
+
+data: {"v": " rituals"}
+
+data: {"v": " and"}
+
+data: {"v": " ceremonies"}
+
+data: {"v": " along"}
+
+data: {"v": " the"}
+
+data: {"v": " sacred"}
+
+data: {"v": " G"}
+
+data: {"v": "anges"}
+
+data: {"v": " River"}
+
+data: {"v": ".\n"}
+
+data: {"v": "3"}
+
+data: {"v": "."}
+
+data: {"v": " "}
+
+data: {"v": " **"}
+
+data: {"v": "Mexico"}
+
+data: {"v": " City"}
+
+data: {"v": ","}
+
+data: {"v": " Mexico"}
+
+data: {"v": ":**"}
+
+data: {"v": " A"}
+
+data: {"v": " vibrant"}
+
+data: {"v": " fusion"}
+
+data: {"v": " of"}
+
+data: {"v": " ancient"}
+
+data: {"v": " Az"}
+
+data: {"v": "tec"}
+
+data: {"v": " ruins"}
+
+data: {"v": ","}
+
+data: {"v": " stunning"}
+
+data: {"v": " colonial"}
+
+data: {"v": " architecture"}
+
+data: {"v": ","}
+
+data: {"v": " and"}
+
+data: {"v": " one"}
+
+data: {"v": " of"}
+
+data: {"v": " the"}
+
+data: {"v": " world"}
+
+data: {"v": "'s"}
+
+data: {"v": " best"}
+
+data: {"v": " food"}
+
+data: {"v": " scenes"}
+
+data: {"v": ".\n"}
+
+data: {"v": "4"}
+
+data: {"v": "."}
+
+data: {"v": " "}
+
+data: {"v": " **"}
+
+data: {"v": "Dub"}
+
+data: {"v": "ai"}
+
+data: {"v": ","}
+
+data: {"v": " UAE"}
+
+data: {"v": ":**"}
+
+data: {"v": " A"}
+
+data: {"v": " city"}
+
+data: {"v": " of"}
+
+data: {"v": " superl"}
+
+data: {"v": "atives"}
+
+data: {"v": " with"}
+
+data: {"v": " fut"}
+
+data: {"v": "uristic"}
+
+data: {"v": " sk"}
+
+data: {"v": "ys"}
+
+data: {"v": "c"}
+
+data: {"v": "rap"}
+
+data: {"v": "ers"}
+
+data: {"v": ","}
+
+data: {"v": " luxury"}
+
+data: {"v": " shopping"}
+
+data: {"v": ","}
+
+data: {"v": " and"}
+
+data: {"v": " desert"}
+
+data: {"v": " adventures"}
+
+data: {"v": " right"}
+
+data: {"v": " on"}
+
+data: {"v": " its"}
+
+data: {"v": " doorstep"}
+
+data: {"v": ".\n\n"}
+
+data: {"v": "---"}
+
+data: {"v": "\n\n"}
+
+data: {"v": "**"}
+
+data: {"v": "To"}
+
+data: {"v": " give"}
+
+data: {"v": " you"}
+
+data: {"v": " the"}
+
+data: {"v": " *"}
+
+data: {"v": "best"}
+
+data: {"v": "*"}
+
+data: {"v": " recommendation"}
+
+data: {"v": ","}
+
+data: {"v": " consider"}
+
+data: {"v": " what"}
+
+data: {"v": " you"}
+
+data: {"v": " love"}
+
+data: {"v": ":**\n\n"}
+
+data: {"v": "*"}
+
+data: {"v": "  "}
+
+data: {"v": " **"}
+
+data: {"v": "Are"}
+
+data: {"v": " you"}
+
+data: {"v": " a"}
+
+data: {"v": " food"}
+
+data: {"v": "ie"}
+
+data: {"v": "?"}
+
+data: {"v": "**"}
+
+data: {"v": " ("}
+
+data: {"v": "Consider"}
+
+data: {"v": " Tokyo"}
+
+data: {"v": ","}
+
+data: {"v": " Mexico"}
+
+data: {"v": " City"}
+
+data: {"v": ","}
+
+data: {"v": " or"}
+
+data: {"v": " Lyon"}
+
+data: {"v": ".)\n"}
+
+data: {"v": "*"}
+
+data: {"v": "  "}
+
+data: {"v": " **"}
+
+data: {"v": "Do"}
+
+data: {"v": " you"}
+
+data: {"v": " love"}
+
+data: {"v": " hiking"}
+
+data: {"v": "?"}
+
+data: {"v": "**"}
+
+data: {"v": " ("}
+
+data: {"v": "Consider"}
+
+data: {"v": " New"}
+
+data: {"v": " Zealand"}
+
+data: {"v": ","}
+
+data: {"v": " Switzerland"}
+
+data: {"v": ","}
+
+data: {"v": " or"}
+
+data: {"v": " Nepal"}
+
+data: {"v": ".)\n"}
+
+data: {"v": "*"}
+
+data: {"v": "  "}
+
+data: {"v": " **"}
+
+data: {"v": "Travel"}
+
+data: {"v": "ing"}
+
+data: {"v": " on"}
+
+data: {"v": " a"}
+
+data: {"v": " budget"}
+
+data: {"v": "?"}
+
+data: {"v": "**"}
+
+data: {"v": " ("}
+
+data: {"v": "Consider"}
+
+data: {"v": " Southeast"}
+
+data: {"v": " Asia"}
+
+data: {"v": " or"}
+
+data: {"v": " Eastern"}
+
+data: {"v": " Europe"}
+
+data: {"v": ".)\n"}
+
+data: {"v": "*"}
+
+data: {"v": "  "}
+
+data: {"v": " **"}
+
+data: {"v": "Looking"}
+
+data: {"v": " for"}
+
+data: {"v": " relaxation"}
+
+data: {"v": "?"}
+
+data: {"v": "**"}
+
+data: {"v": " ("}
+
+data: {"v": "Consider"}
+
+data: {"v": " the"}
+
+data: {"v": " Mald"}
+
+data: {"v": "ives"}
+
+data: {"v": " or"}
+
+data: {"v": " a"}
+
+data: {"v": " Greek"}
+
+data: {"v": " island"}
+
+data: {"v": ".)\n\n"}
+
+data: {"v": "Let"}
+
+data: {"v": " me"}
+
+data: {"v": " know"}
+
+data: {"v": " your"}
+
+data: {"v": " travel"}
+
+data: {"v": " style"}
+
+data: {"v": " or"}
+
+data: {"v": " a"}
+
+data: {"v": " region"}
+
+data: {"v": " you"}
+
+data: {"v": "'re"}
+
+data: {"v": " curious"}
+
+data: {"v": " about"}
+
+data: {"v": ","}
+
+data: {"v": " and"}
+
+data: {"v": " I"}
+
+data: {"v": " can"}
+
+data: {"v": " tailor"}
+
+data: {"v": " this"}
+
+data: {"v": " list"}
+
+data: {"v": " even"}
+
+data: {"v": " further"}
+
+data: {"v": " for"}
+
+data: {"v": " you"}
+
+data: {"v": "!"}
+
+data: {"v": [{"v": "FINISHED", "p": "status"}, {"v": 3871, "p": "accumulated_token_usage"}], "p": "response", "o": "BATCH"}
+
+event: finish
+data: {}
+
+event: update_session
+data: {"updated_at":1763778803.339492}
+
+event: close
+data: {"click_behavior":"none","auto_resume":false}
+

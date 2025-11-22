@@ -13,7 +13,14 @@ app.get("/chat", async (c: Context) => {
   const platform = c.req.query("platform") || "z.ai"
   let data: any = { success: false }
   const requestId = cuid()
-  const appName = platform === "z.ai" ? "zai-proxy" : "mistral-proxy"
+  let appName = "zai-proxy" //? "zai-proxy" : "mistral-proxy"
+  if (platform === "z.ai") {
+    appName = "zai-proxy"
+  } else if (platform === "mistral.ai") {
+    appName = "mistral-proxy"
+  } else if (platform === "deepseek") {
+    appName = "deepseek-proxy"
+  }
   const socket = await emitSocket(ioInstance, appName, "chat", {
     payload: { prompt },
     requestId,
