@@ -14,6 +14,7 @@ import { getUserMessages } from "./chat-history/getUserMessages"
 import { getSystemMessages } from "./chat-history/getSystemMessages"
 import { generateUserPrompt } from "./chat-history/generateUserPrompt"
 import { saveJsonFile } from "../../global/fn/saveJsonFile"
+import { saveChatHistory } from "./chat-history/saveChatHistory"
 
 async function beforeSendCallback(config: any, messages: any[]) {
   const chatHistoryDir = "src/examples/chat-history"
@@ -30,17 +31,24 @@ async function beforeSendCallback(config: any, messages: any[]) {
     userPrompt,
   }
 }
+async function afterSendCallback(config: any, messages: any[], assistantMessage: any) {
+  const chatHistoryDir = "src/examples/chat-history"
+  const { chatId } = config
+  const history = [...messages, assistantMessage]
+  await saveChatHistory(chatHistoryDir, chatId, history)
+  return history
+}
 async function main() {
   marked.use(markedTerminal())
   // console.log(chatList)
   // return
   if (true) {
-    const chatSession = await ChatSession.getInstance(cuid())
+    // const chatSession = await ChatSession.getInstance(cuid())
 
     const systemMsg = `Jawab dengan bahasa gaul dan santai.`
 
     const chatHistoryFile = "chat-history.json"
-    saveJsonFile(chatHistoryFile, [])
+    // saveJsonFile(chatHistoryFile, [])
 
     let history = await loadJsonFile(chatHistoryFile)
 
@@ -50,7 +58,7 @@ async function main() {
     })
     let lastMessageDisplayed = false
     const config = {
-      chatId: cuid(),
+      chatId: "cmiafxj0m0001i4td0p1o0736",
     }
     while (true) {
       // if (!lastMessageDisplayed) {
@@ -77,37 +85,10 @@ async function main() {
         break
       }
 
-      // const xmlPayload = createContextualUserMessage(
-      //   systemMsg,
-      //   history,
-      //   currentQuery
-      // )
-      // console.log(xmlPayload)
-      // const prompt = xmlPayload.replace('<?xml version="1.0"?>', "")
-      // const spinner = ora(`Talking to KIMI`).start()
       let outputBuffer_content = ""
-
-      const outputBuffer = {
-        continueStreamBuffer: false,
-        streamBuffer: "",
-        processStreamBuffer: false,
-        onSaveChat: (chat) => {
-          if (chat.id && chat.createTime) {
-            // console.log("saveChat", { chat })
-            chatSession?.setChatId(chat.id)
-          }
-        },
-        onSaveUserMessage: (message) => {
-          // chatSession?.updateLastUserMessage(message.id, message.parentId)
-          // console.log("saveMessage", { message })
-        },
-        onSaveAssistantMessage: (message) => {
-          if (message.content.length === 0) message.content = outputBuffer_content
-          chatSession?.insertAssistantMessage(message.content, message.id)
-        },
-      }
-
-      const chatResponse = await sendChatFinal([{ role: "system", content: systemMsg }, ...history, { role: "user", content: currentQuery }], beforeSendCallback, config)
+      let appendHistory = history.length > 0 ? history.filter((m) => m.role !== "system") : history
+      let inputMessages = [{ role: "system", content: systemMsg }, ...appendHistory, { role: "user", content: currentQuery }]
+      const chatResponse = await sendChatFinal(inputMessages, beforeSendCallback, config)
       if (!chatResponse) {
         return
       }
@@ -140,16 +121,11 @@ async function main() {
             }
           }
         }
-
-        history.push({
-          role: "user",
-          content: currentQuery,
-        })
-
-        history.push({
+        const assistantMessage = {
           role: "assistant",
           content: outputBuffer_content,
-        })
+        }
+        history = await afterSendCallback(config, inputMessages, assistantMessage)
 
         saveJsonFile(chatHistoryFile, history)
 

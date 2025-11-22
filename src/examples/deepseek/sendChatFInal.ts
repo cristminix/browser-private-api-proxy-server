@@ -5,7 +5,7 @@ import { getLastUserMessageContent } from "../../providers/zai/getLastUserMessag
 export async function sendChatFinal(messages: any[], beforeSendCallback: (config: any, messages: any[]) => Promise<any>, config: any) {
   //  = getLastUserMessageContent(messages) ?? "Hai"
   const { userPrompt } = await beforeSendCallback(config, messages)
-  // console.log(userPrompt)
+  // console.log({ userPrompt })
   // return null
   // const startTime = performance.now()
   const response = await fetch(`http://127.0.0.1:4001/api/chat?platform=deepseek&prompt=${encodeURIComponent(userPrompt)}`)

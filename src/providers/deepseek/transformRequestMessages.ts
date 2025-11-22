@@ -63,7 +63,7 @@ export function transformMessages(messages: Message[]): TransformedMessage[] {
     }))
   }
   // console.log({finalSystemMessages})
-  const userMessages = transformedMessages.filter((msg) => msg.role === "user")
+  const userMessages = transformedMessages.filter((msg) => msg.role !== "system")
   const finalMessages = finalSystemMessages.concat(userMessages)
 
   // debug.log(JSON.stringify(finalMessages, null, 2));
