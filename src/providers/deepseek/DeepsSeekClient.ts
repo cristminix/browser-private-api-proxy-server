@@ -25,6 +25,7 @@ class DeepsSeekClient {
     firstTime: true,
   }
   lastInputMessages: any[] = []
+
   constructor(io: any, chatHandler: any) {
     this.io = io
     this.chatHandler = chatHandler
@@ -51,7 +52,7 @@ class DeepsSeekClient {
         return data.chatId
       }
     }
-    return null
+    return await kvstore.get("use_chat_id")
   }
   async beforeSendCallback(config: any, messages: any[]) {
     const chatHistoryDir = "src/examples/chat-history"
@@ -178,6 +179,9 @@ class DeepsSeekClient {
       */
         // console.log(jsonBody)
         // jsonBody.messages = transformedMessages //[{ role: "system", content: "Jawab singkat saja" }, ...jsonBody.messages]
+        if (jsonBody.chat_session_id) {
+          await kvstore.put("use_chat_id", jsonBody.chat_session_id)
+        }
         body = JSON.stringify(jsonBody)
       }
       const response = await fetch(`${this.baseUrl}${url}`, {
