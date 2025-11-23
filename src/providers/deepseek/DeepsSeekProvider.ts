@@ -38,7 +38,7 @@ class DeepsSeekProvider {
     }
 
     const assistantMessage = { role: "assistant", content: chatBuffer.content }
-    console.log(assistantMessage)
+    // console.log(assistantMessage)
     await this.client.afterSendCallback(assistantMessage)
   }
 

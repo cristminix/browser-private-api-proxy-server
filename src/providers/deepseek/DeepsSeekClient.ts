@@ -12,6 +12,8 @@ import { getSystemMessages } from "./chat-history/getSystemMessages"
 import { generateUserPrompt } from "./chat-history/generateUserPrompt"
 import { saveChatHistory } from "./chat-history/saveChatHistory"
 import { emitSocket } from "../../global/fn/emitSocket"
+import { updateTmpChat } from "./chat-history/updateTmpChat"
+import { kvstore } from "../../db/store"
 
 class DeepsSeekClient {
   baseUrl = "https://chat.deepseek.com"
@@ -44,6 +46,7 @@ class DeepsSeekClient {
 
       const data = await this.chatHandler.waitForAnswerKey("return-chat-id")
       // await unsetSocketBusy(socket.id)
+      console.log({ data })
       if (data) {
         return data.chatId
       }
@@ -69,6 +72,7 @@ class DeepsSeekClient {
     //   userPrompt,
     // })
     this.lastInputMessages = transformedMessages
+    console.log({ messages, userPrompt, config })
     return {
       chatId,
       userPrompt,
@@ -85,19 +89,59 @@ class DeepsSeekClient {
     )
     return history
   }
+  async generateTmpChatId() {
+    const key = "deepseek_tmp_chat_id"
+    const timestampKey = "deepseek_tmp_chat_id_tstamp"
+    let lastChatId = await kvstore.get(key)
+    let lastChatIdTimestamp = await kvstore.get(timestampKey)
+    const createNew = async () => {
+      const newLastChatId = cuid()
+      await kvstore.put(key, newLastChatId)
+      const currentDate = new Date()
+      await kvstore.put(timestampKey, currentDate.getTime())
+      return newLastChatId
+    }
+    if (!lastChatId) {
+      lastChatId = await createNew()
+    } else {
+      const currentDate = new Date()
+
+      if (currentDate.getTime() - lastChatIdTimestamp > 2 * 60) {
+        lastChatId = await createNew()
+      }
+    }
+    return lastChatId
+  }
+  async unsetTempChatId() {
+    const key = "deepseek_tmp_chat_id"
+    const timestampKey = "deepseek_tmp_chat_id_tstamp"
+    await kvstore.delete(key)
+    await kvstore.delete(timestampKey)
+  }
   async fetchWithBrowserProxy(
     messages: any,
     realModel: string,
     thinking: boolean
   ) {
-    const tmpChatId = cuid()
+    const tmpChatId = await this.generateTmpChatId()
+    console.log({ tmpChatId })
     this.config = {
-      chatId: await this.getCurrentChatId(),
+      chatId: null,
       tmpChatId,
       firstTime: true,
     }
     if (this.config.chatId) {
       this.config.firstTime = false
+    }
+    if (!this.config.chatId) {
+      const chatHistoryDir = "src/examples/chat-history"
+
+      this.config.chatId = await this.getCurrentChatId()
+      this.config.firstTime = false
+      const status = await updateTmpChat(chatHistoryDir, this.config)
+      if (status) {
+        await this.unsetTempChatId()
+      }
     }
     const { userPrompt: prompt } = await this.beforeSendCallback(
       this.config,
@@ -105,6 +149,8 @@ class DeepsSeekClient {
     )
 
     let data: any = { success: false }
+    // console.log({ messages, prompt })
+    // return
     const requestId = cuid()
     const socket = await emitDeepSeekSocket(this.io, "chat", {
       payload: { prompt },

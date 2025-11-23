@@ -6,5 +6,15 @@ export async function updateTmpChat(chatHistoryDir: string, config: any) {
   const chatHistoryJsonPath = `${chatHistoryDir}/${chatId}.json`
 
   // Rename file from oldChatHistoryJsonPath to chatHistoryJsonPath
-  fs.renameSync(oldChatHistoryJsonPath, chatHistoryJsonPath)
+  try {
+    if (fs.existsSync(oldChatHistoryJsonPath)) {
+      fs.renameSync(oldChatHistoryJsonPath, chatHistoryJsonPath)
+      return true
+    }
+  } catch (error) {}
+  if (fs.existsSync(chatHistoryJsonPath)) {
+    return true
+  }
+
+  return false
 }

@@ -4,15 +4,22 @@ export function getUserMessages(messages: any[], history: any[]) {
   if (Array.isArray(history)) {
     if (history.length > 0) {
       userMessages = messages.slice(history.length - 1)
-      return userMessages.filter((m) => m.role === "user")
+      userMessages = userMessages.filter((m) => m.role === "user")
+      if (userMessages.length > 0) {
+        return userMessages
+      }
     }
   }
 
   // Find the last assistant message index
 
-  const lastAssistantIndex = messages.findLastIndex((m) => m.role === "assistant")
+  const lastAssistantIndex = messages.findLastIndex(
+    (m) => m.role === "assistant"
+  )
   if (lastAssistantIndex !== -1) {
-    userMessages = messages.filter((m) => m.role !== "system").slice(lastAssistantIndex)
+    userMessages = messages
+      .filter((m) => m.role !== "system")
+      .slice(lastAssistantIndex)
   } else {
     userMessages = messages.filter((m) => m.role !== "system")
   }

@@ -1,6 +1,6 @@
 import { ChatCompletionRequest } from "./types/chat"
 import ZaiProvider from "../providers/zai/ZaiProvider"
-import DeepsSeekProvider from "src/providers/deepseek/DeepsSeekProvider"
+import DeepsSeekProvider from "../providers/deepseek/DeepsSeekProvider"
 async function createCompletions(
   chatRequest: ChatCompletionRequest,
   io: any,
