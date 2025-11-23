@@ -14,6 +14,7 @@ import { saveChatHistory } from "./chat-history/saveChatHistory"
 import { emitSocket } from "../../global/fn/emitSocket"
 import { updateTmpChat } from "./chat-history/updateTmpChat"
 import { kvstore } from "../../db/store"
+import { saveJsonFile } from "src/global/fn/saveJsonFile"
 
 class DeepsSeekClient {
   baseUrl = "https://chat.deepseek.com"
@@ -32,15 +33,10 @@ class DeepsSeekClient {
   }
   async getCurrentChatId() {
     const requestId = cuid()
-    const socket = await emitSocket(
-      this.io,
-      "deepseek-proxy",
-      "get-current-chat",
-      {
-        payload: {},
-        requestId,
-      }
-    )
+    const socket = await emitSocket(this.io, "deepseek-proxy", "get-current-chat", {
+      payload: {},
+      requestId,
+    })
     if (socket) {
       console.log(socket.id)
       // await setSocketBusy(socket.id)
@@ -119,11 +115,7 @@ class DeepsSeekClient {
     await kvstore.delete(key)
     await kvstore.delete(timestampKey)
   }
-  async fetchWithBrowserProxy(
-    messages: any,
-    realModel: string,
-    thinking: boolean
-  ) {
+  async fetchWithBrowserProxy(messages: any, realModel: string, thinking: boolean) {
     const tmpChatId = await this.generateTmpChatId()
     console.log({ tmpChatId })
     this.config = {
@@ -144,10 +136,7 @@ class DeepsSeekClient {
         await this.unsetTempChatId()
       }
     }
-    const { userPrompt: prompt } = await this.beforeSendCallback(
-      this.config,
-      messages
-    )
+    const { userPrompt: prompt } = await this.beforeSendCallback(this.config, messages)
 
     let data: any = { success: false }
     // console.log({ messages, prompt })
@@ -202,12 +191,7 @@ class DeepsSeekClient {
   get chat() {
     return {
       completions: {
-        create: async (
-          params: any,
-          requestOption: any = {},
-          direct = false,
-          chatBuffer: any = { content: "" }
-        ) => {
+        create: async (params: any, requestOption: any = {}, direct = false, chatBuffer: any = { content: "" }) => {
           let { model: requstModel, ...options } = params
 
           const defaultModel = "deepseek-chat"
@@ -218,11 +202,7 @@ class DeepsSeekClient {
           // console.log({ realModel, endpoint, signature })
           // return
           const thinking = false
-          const response = await this.fetchWithBrowserProxy(
-            options.messages,
-            realModel,
-            thinking
-          )
+          const response = await this.fetchWithBrowserProxy(options.messages, realModel, thinking)
 
           // await makeStreamCompletion(response, true, realModel, "", [])
 
@@ -232,16 +212,9 @@ class DeepsSeekClient {
           }
 
           if (params.stream) {
-            return this.makeStreamCompletion(
-              response,
-              direct,
-              realModel,
-              chatBuffer
-            )
+            return this.makeStreamCompletion(response, direct, realModel, chatBuffer)
           }
-          return this._sendResponseFromStream(
-            this.makeStreamCompletion(response, false, realModel, chatBuffer)
-          )
+          return this._sendResponseFromStream(this.makeStreamCompletion(response, false, realModel, chatBuffer))
         },
       },
     }
@@ -274,19 +247,10 @@ class DeepsSeekClient {
 
     return chatResponse
   }
-  async *makeStreamCompletion(
-    response: Response,
-    sso = false,
-    model: string,
-    chatBuffer: any
-  ) {
+  async *makeStreamCompletion(response: Response, sso = false, model: string, chatBuffer: any) {
     // Validate response with more detailed error message
     if (!response.ok) {
-      throw new Error(
-        `API request failed with status ${
-          response.status
-        } and message: ${await response.text()}`
-      )
+      throw new Error(`API request failed with status ${response.status} and message: ${await response.text()}`)
     }
 
     // Check if response body exists
@@ -303,7 +267,7 @@ class DeepsSeekClient {
 
     let buffer = ""
     let completionId = 1
-
+    let responseLines: any[] = []
     try {
       // Process the stream until completion
       let streamCompleted = false
@@ -313,29 +277,30 @@ class DeepsSeekClient {
         // Handle stream completion
         if (done) {
           // Send final event if in SSO mode
+          console.log({ sso, calculatedUsage })
+          const totalTokens = promptTokens + completionTokens
+
+          let usage = {
+            prompt_tokens: promptTokens,
+            completion_tokens: completionTokens,
+            total_tokens: totalTokens,
+          }
+          if (calculatedUsage) {
+            usage.total_tokens = calculatedUsage.accumulated_token_usage
+          }
+          const finalChunk = buildStreamChunk({
+            model,
+            index: completionId,
+            finishReason: "done",
+            content: "",
+            usage,
+            done: true,
+          })
           if (sso) {
-            const totalTokens = promptTokens + completionTokens
-            let usage = {
-              prompt_tokens: promptTokens,
-              completion_tokens: completionTokens,
-              total_tokens: totalTokens,
-            }
-            if (calculatedUsage) {
-              usage = calculatedUsage
-            }
-            const finalChunk = buildStreamChunk({
-              model,
-              index: completionId,
-              finishReason: "done",
-              content: "",
-              usage,
-              done: true,
-            })
-            yield encoder.encode(
-              `data: ${JSON.stringify(finalChunk)}\n\ndata: [DONE]\n\n`
-            )
+            yield encoder.encode(`data: ${JSON.stringify(finalChunk)}\n\ndata: [DONE]\n\n`)
           }
           streamCompleted = true
+          saveJsonFile(`response-${cuid()}.json`, responseLines)
         }
 
         // Decode the chunk and add to buffer
@@ -368,7 +333,7 @@ class DeepsSeekClient {
               }
 
               const jsonData = JSON.parse(jsonString)
-
+              responseLines.push(jsonData)
               // if (jsonData.type === "chat:completion") {
               //   const { data } = jsonData
               //   const { done: done2, delta_content, usage, error } = data
@@ -383,21 +348,12 @@ class DeepsSeekClient {
               //     // console.log(usage)
               //   }
               // console.log(jsonData)
-              const result = this.convertToOpenaiTextStream(
-                jsonData,
-                model,
-                completionId,
-                calculatedUsage
-              )
+              const result = this.convertToOpenaiTextStream(jsonData, model, completionId, calculatedUsage)
               if (result) {
                 // console.log(result)
                 if (chatBuffer) {
                   const typedChunk = result
-                  if (
-                    typedChunk.choices &&
-                    Array.isArray(typedChunk.choices) &&
-                    typedChunk.choices.length > 0
-                  ) {
+                  if (typedChunk.choices && Array.isArray(typedChunk.choices) && typedChunk.choices.length > 0) {
                     const bufferChunk = typedChunk.choices[0].delta.content
                     if (bufferChunk) {
                       chatBuffer.content += bufferChunk
@@ -434,25 +390,40 @@ class DeepsSeekClient {
     }
   }
 
-  convertToOpenaiTextStream(
-    jsonData: any,
-    model: string,
-    completionId: number,
-    usage: any = null
-  ) {
+  convertToOpenaiTextStream(jsonData: any, model: string, completionId: number, report: any = null) {
     const { v: inputData } = jsonData
     let content, done
     if (typeof inputData === "string") {
       content = inputData
     } else if (Array.isArray(inputData)) {
+      console.log({ inputData_length: inputData.length, inputData })
+      let i = 0
       for (const item of inputData) {
-        const { v: nextData } = item
+        const { v: nextData, p, o } = item
+        console.log("here-a", i, item)
+        i += 1
         if (nextData) {
-          if (Array.isArray(nextData)) {
+          // console.log("here-0", p)
+
+          if (typeof nextData === "string" || typeof nextData === "number") {
+            if (o) {
+              if (o === "APPEND") {
+                content = nextData
+              }
+            }
+            if (p) {
+              console.log("here", p)
+              if (p === "accumulated_token_usage" || p === "status" || p === "FINISHED") {
+                report[p] = nextData
+              }
+            }
+          } else if (Array.isArray(nextData)) {
             for (const subItem of nextData) {
               const { type, content: text } = subItem
-              if (text) {
+              if (text && type === "RESPONSE") {
                 content = text
+              } else {
+                console.log("here-xxx")
               }
             }
           }

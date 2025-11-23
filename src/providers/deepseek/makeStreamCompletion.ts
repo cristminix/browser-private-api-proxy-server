@@ -48,10 +48,7 @@ interface StreamState {
  * @param options - Configuration options for stream processing
  * @returns Promise that resolves when stream processing is complete
  */
-export async function* makeStreamCompletion(
-  response: Response,
-  options: Partial<StreamOptions> | string = {}
-): AsyncGenerator<any, void, unknown> {
+export async function* makeStreamCompletion(response: Response, options: Partial<StreamOptions> | string = {}): AsyncGenerator<any, void, unknown> {
   // Handle backward compatibility where options was a boolean
   const config: StreamOptions =
     typeof options === "boolean"
@@ -63,22 +60,13 @@ export async function* makeStreamCompletion(
           ...(options as Partial<StreamOptions>),
         }
 
-  const {
-    sso = false,
-    model = "",
-    print = false,
-    onError,
-    onData,
-    onDone,
-  } = config
+  const { sso = false, model = "", print = false, onError, onData, onDone } = config
 
   try {
     // Validate response with more detailed error message
     if (!response.ok) {
       const errorText = await response.text()
-      const error = new Error(
-        `API request failed with status ${response.status}: ${errorText}`
-      )
+      const error = new Error(`API request failed with status ${response.status}: ${errorText}`)
       if (onError) onError(error)
       throw error
     }
@@ -506,24 +494,35 @@ async function processChatCompletionWithYield(
 /**
  * Convert stream data to OpenAI-compatible format
  */
-function convertToOpenaiTextStream(
-  jsonData: any,
-  model: string,
-  completionId: number
-): any | null {
+export function convertToOpenaiTextStream(jsonData: any, model: string, completionId: number): any | null {
   const { v: inputData } = jsonData
   let content, done
   if (typeof inputData === "string") {
     content = inputData
   } else if (Array.isArray(inputData)) {
     for (const item of inputData) {
-      const { v: nextData } = item
+      const { v: nextData, p, o } = item
       if (nextData) {
-        if (Array.isArray(nextData)) {
+        if (typeof nextData === "string") {
+          if (o) {
+            if (o === "APPEND") {
+              content = nextData
+            }
+          }
+          if (p) {
+            console.log("here", p)
+            if (p === "accumulated_token_usage") {
+            } else if (p === "status") {
+            } else if (p === "FINISHED") {
+            }
+          }
+        } else if (Array.isArray(nextData)) {
           for (const subItem of nextData) {
             const { type, content: text } = subItem
-            if (text) {
+            if (text && type === "RESPONSE") {
               content = text
+            } else {
+              // console.log("here")
             }
           }
         }
