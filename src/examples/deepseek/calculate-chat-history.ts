@@ -1,19 +1,21 @@
 import cuid from "cuid"
 import * as path from "path"
 import { loadJsonFile } from "src/global/fn/loadJsonFile"
-import { loadChatHistory } from "./chat-history/loadChatHistory"
+import { loadChatHistory } from "../../providers/deepseek/chat-history/loadChatHistory"
 import { transformMessages } from "../../providers/deepseek/transformRequestMessages"
-import { saveChatHistory } from "./chat-history/saveChatHistory"
-import { getUserMessages } from "./chat-history/getUserMessages"
-import { getSystemMessages } from "./chat-history/getSystemMessages"
-import { generateUserPrompt } from "./chat-history/generateUserPrompt"
+import { saveChatHistory } from "../../providers/deepseek/chat-history/saveChatHistory"
+import { getUserMessages } from "../../providers/deepseek/chat-history/getUserMessages"
+import { getSystemMessages } from "../../providers/deepseek/chat-history/getSystemMessages"
+import { generateUserPrompt } from "../../providers/deepseek/chat-history/generateUserPrompt"
 import { saveJsonFile } from "src/global/fn/saveJsonFile"
 import fs from "fs"
 const main = async () => {
   const chatId = "cmi9ur3ym00004ctd0tg68tt7"
   const chatHistoryDir = "src/examples/chat-history"
   // iter 1
-  let messages = await loadJsonFile(process.cwd() + "/chat-input-test/3ldzqd/messages-00.json")
+  let messages = await loadJsonFile(
+    process.cwd() + "/chat-input-test/3ldzqd/messages-00.json"
+  )
   let history: any[] = [] // await loadChatHistory(chatHistoryDir, chatId)
 
   let transformedMessages = transformMessages(messages)
@@ -35,7 +37,9 @@ const main = async () => {
   ]
   // save history
   await saveChatHistory(chatHistoryDir, chatId, history)
-  messages = await loadJsonFile(process.cwd() + "/chat-input-test/3ldzqd/messages-01.json")
+  messages = await loadJsonFile(
+    process.cwd() + "/chat-input-test/3ldzqd/messages-01.json"
+  )
   transformedMessages = transformMessages(messages)
   // console.log(transformedMessages)
   userMessages = getUserMessages(transformedMessages, history)
