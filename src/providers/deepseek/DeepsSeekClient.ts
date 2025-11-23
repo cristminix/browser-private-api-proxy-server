@@ -72,7 +72,7 @@ class DeepsSeekClient {
     //   userPrompt,
     // })
     this.lastInputMessages = transformedMessages
-    console.log({ messages, userPrompt, config })
+    console.log({ config })
     return {
       chatId,
       userPrompt,
