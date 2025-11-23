@@ -17,7 +17,12 @@ class DeepsSeekClient {
   baseUrl = "https://chat.deepseek.com"
   io: SocketIOServer
   chatHandler: ChatAnswerHandler
-
+  config: any = {
+    chatId: null,
+    tmpChatId: cuid(),
+    firstTime: true,
+  }
+  lastInputMessages: any[] = []
   constructor(io: any, chatHandler: any) {
     this.io = io
     this.chatHandler = chatHandler
@@ -56,23 +61,23 @@ class DeepsSeekClient {
     let userMessages = getUserMessages(transformedMessages, history)
     let systemMessages = getSystemMessages(transformedMessages, history)
     let userPrompt = generateUserPrompt(systemMessages, userMessages)
-    console.log({
-      messages,
-      transformedMessages,
-      userMessages,
-      systemMessages,
-      userPrompt,
-    })
-
+    // console.log({
+    //   messages,
+    //   transformedMessages,
+    //   userMessages,
+    //   systemMessages,
+    //   userPrompt,
+    // })
+    this.lastInputMessages = transformedMessages
     return {
       chatId,
       userPrompt,
     }
   }
-  async afterSendCallback(config: any, messages: any[], assistantMessage: any) {
+  async afterSendCallback(assistantMessage: any) {
     const chatHistoryDir = "src/examples/chat-history"
-    const { chatId, firstTime, tmpChatId } = config
-    const history = [...messages, assistantMessage]
+    const { chatId, firstTime, tmpChatId } = this.config
+    const history = [...this.lastInputMessages, assistantMessage]
     await saveChatHistory(
       chatHistoryDir,
       firstTime ? tmpChatId : chatId,
@@ -86,16 +91,16 @@ class DeepsSeekClient {
     thinking: boolean
   ) {
     const tmpChatId = cuid()
-    const config = {
+    this.config = {
       chatId: await this.getCurrentChatId(),
       tmpChatId,
       firstTime: true,
     }
-    if (config.chatId) {
-      config.firstTime = false
+    if (this.config.chatId) {
+      this.config.firstTime = false
     }
     const { userPrompt: prompt } = await this.beforeSendCallback(
-      config,
+      this.config,
       messages
     )
 
@@ -145,7 +150,8 @@ class DeepsSeekClient {
         create: async (
           params: any,
           requestOption: any = {},
-          direct = false
+          direct = false,
+          chatBuffer: any = { content: "" }
         ) => {
           let { model: requstModel, ...options } = params
 
@@ -171,10 +177,15 @@ class DeepsSeekClient {
           }
 
           if (params.stream) {
-            return this.makeStreamCompletion(response, direct, realModel)
+            return this.makeStreamCompletion(
+              response,
+              direct,
+              realModel,
+              chatBuffer
+            )
           }
           return this._sendResponseFromStream(
-            this.makeStreamCompletion(response, false, realModel)
+            this.makeStreamCompletion(response, false, realModel, chatBuffer)
           )
         },
       },
@@ -208,7 +219,12 @@ class DeepsSeekClient {
 
     return chatResponse
   }
-  async *makeStreamCompletion(response: Response, sso = false, model: string) {
+  async *makeStreamCompletion(
+    response: Response,
+    sso = false,
+    model: string,
+    chatBuffer: any
+  ) {
     // Validate response with more detailed error message
     if (!response.ok) {
       throw new Error(
@@ -320,7 +336,19 @@ class DeepsSeekClient {
               )
               if (result) {
                 // console.log(result)
-
+                if (chatBuffer) {
+                  const typedChunk = result
+                  if (
+                    typedChunk.choices &&
+                    Array.isArray(typedChunk.choices) &&
+                    typedChunk.choices.length > 0
+                  ) {
+                    const bufferChunk = typedChunk.choices[0].delta.content
+                    if (bufferChunk) {
+                      chatBuffer.content += bufferChunk
+                    }
+                  }
+                }
                 if (sso) {
                   yield encoder.encode(`data: ${JSON.stringify(result)}\n\n`)
                 } else {

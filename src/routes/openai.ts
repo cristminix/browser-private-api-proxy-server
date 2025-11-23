@@ -18,7 +18,7 @@ const createModel = (name: string) => ({
 app.get("/models", async (c: Context) => {
   return c.json({
     type: "list",
-    data: [createModel("zai"), createModel("oreally")],
+    data: [createModel("zai"), createModel("deepseek"), createModel("oreally")],
   })
 })
 app.post("/chat/completions", async (c: Context) => {

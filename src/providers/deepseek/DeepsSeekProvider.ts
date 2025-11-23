@@ -17,13 +17,17 @@ class DeepsSeekProvider {
     //@ts-ignore
   ): Promise<AsyncGenerator<ChatResponseStream>> {
     // Gunakan signature 2 arg untuk memanggil streaming (sesuai implementasi HuggingFace client)
+    const chatBuffer = {
+      content: "",
+    }
     const response: any = await this.client.chat.completions.create(
       {
         ...request,
         stream: true,
       },
       {},
-      false
+      false,
+      chatBuffer
     )
 
     // const reader = response.body.getReader()
@@ -32,6 +36,10 @@ class DeepsSeekProvider {
       // console.log(chunk)
       yield chunk
     }
+
+    const assistantMessage = { role: "assistant", content: chatBuffer.content }
+    console.log(assistantMessage)
+    await this.client.afterSendCallback(assistantMessage)
   }
 
   public async create(request: ChatCompletionRequest): Promise<ChatResponse> {
