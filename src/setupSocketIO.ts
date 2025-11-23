@@ -1,7 +1,11 @@
 import { Server as SocketIOServer } from "socket.io"
 import type { Socket } from "socket.io"
 import type { Server as HttpServer } from "http"
-import { getSocketConnectionIds, setSocketAppName, updateSocketConnectionIds } from "./db/msocket"
+import {
+  getSocketConnectionIds,
+  setSocketAppName,
+  updateSocketConnectionIds,
+} from "./db/msocket"
 import { ChatAnswerHandler } from "./global/classes/ChatAnswerHandler"
 
 // Define the type for our messages
@@ -19,7 +23,7 @@ const sendHeartbeats = async (io: any) => {
     connectionIds.forEach((socketId: string) => {
       const socket = io.sockets.sockets.get(socketId)
       if (socket) {
-        console.log(`sending heartbeat to ${socketId}`)
+        // console.log(`sending heartbeat to ${socketId}`)
         // Socket exists, can send heartbeat or perform other operations
         socket.emit("heartbeat", { timestamp: Date.now() })
       } else {
@@ -30,7 +34,10 @@ const sendHeartbeats = async (io: any) => {
 }
 let ioInstance: any = null
 
-export function setupSocketIO(server: HttpServer, chatHandlerAnswer: ChatAnswerHandler): SocketIOServer {
+export function setupSocketIO(
+  server: HttpServer,
+  chatHandlerAnswer: ChatAnswerHandler
+): SocketIOServer {
   const io = new SocketIOServer(server, {
     cors: {
       origin: "*", // In production, specify your allowed origins
@@ -57,7 +64,8 @@ export function setupSocketIO(server: HttpServer, chatHandlerAnswer: ChatAnswerH
     })
     socket.on("message", (data) => {
       try {
-        const message: Message = typeof data === "string" ? JSON.parse(data) : data
+        const message: Message =
+          typeof data === "string" ? JSON.parse(data) : data
         switch (message.type) {
           case "ping":
             socket.emit("message", { type: "pong", timestamp: Date.now() })
@@ -70,7 +78,12 @@ export function setupSocketIO(server: HttpServer, chatHandlerAnswer: ChatAnswerH
 
     // Handle client disconnect
     socket.on("disconnect", (reason) => {
-      console.log("Socket.IO client disconnected:", socket.id, "reason:", reason)
+      console.log(
+        "Socket.IO client disconnected:",
+        socket.id,
+        "reason:",
+        reason
+      )
       updateSocketConnectionIds(socket.id, "out")
     })
 
@@ -79,7 +92,7 @@ export function setupSocketIO(server: HttpServer, chatHandlerAnswer: ChatAnswerH
       console.error("Socket.IO error:", error)
     })
     socket.on("heartbeat", (data: any) => {
-      console.log("HEARTBEAT")
+      // console.log("HEARTBEAT")
 
       if (!data) return
       const { appName } = data

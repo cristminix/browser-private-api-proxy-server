@@ -56,10 +56,10 @@ class DeepsSeekClient {
   async beforeSendCallback(config: any, messages: any[]) {
     const chatHistoryDir = "src/examples/chat-history"
     const { chatId, tmpChatId, firstTime } = config
-    let history = await loadChatHistory(
-      chatHistoryDir,
-      firstTime ? tmpChatId : chatId
-    )
+
+    // Gunakan tmpChatId jika chatId null untuk menghindari pembacaan file null.json
+    const fileId = chatId && !firstTime ? chatId : tmpChatId
+    let history = await loadChatHistory(chatHistoryDir, fileId)
     let transformedMessages = transformMessages(messages)
     let userMessages = getUserMessages(transformedMessages, history)
     let systemMessages = getSystemMessages(transformedMessages, history)
@@ -82,11 +82,10 @@ class DeepsSeekClient {
     const chatHistoryDir = "src/examples/chat-history"
     const { chatId, firstTime, tmpChatId } = this.config
     const history = [...this.lastInputMessages, assistantMessage]
-    await saveChatHistory(
-      chatHistoryDir,
-      firstTime ? tmpChatId : chatId,
-      history
-    )
+
+    // Gunakan tmpChatId jika chatId null untuk menghindari penulisan file null.json
+    const fileId = chatId && !firstTime ? chatId : tmpChatId
+    await saveChatHistory(chatHistoryDir, fileId, history)
     return history
   }
   async generateTmpChatId() {
