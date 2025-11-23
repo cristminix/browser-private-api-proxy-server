@@ -52,6 +52,13 @@ class DeepsSeekProvider {
       false
     )
     // console.log({ response })
+
+    const assistantMessage = {
+      role: "assistant",
+      content: response.choices?.[0]?.message?.content || "",
+    }
+    await this.client.afterSendCallback(assistantMessage)
+
     return response
   }
 }
