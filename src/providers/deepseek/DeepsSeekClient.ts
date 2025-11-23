@@ -162,13 +162,14 @@ class DeepsSeekClient {
       data = await this.chatHandler.waitForAnswer(socket.id, requestId)
       await unsetSocketBusy(socket.id)
     }
+    let jsonBody: any = {}
     // console.log(data.phase)
     if (data.phase === "FETCH") {
       console.log("--Sending request to deepseek--")
       let { url, body, headers } = data
       // console.log({ url, body, headers })
       if (body) {
-        const jsonBody = JSON.parse(body)
+        jsonBody = JSON.parse(body)
         // jsonBody.features.enable_thinking = false
         // jsonBody.features.auto_web_search = true
         // jsonBody.features.web_search = false
@@ -188,6 +189,10 @@ class DeepsSeekClient {
         method: "POST",
         headers: { ...headers },
         body,
+      })
+      await emitSocket(this.io, "deepseek-proxy", "chat-reload", {
+        chatId: jsonBody.chat_session_id,
+        requestId: cuid(),
       })
       return response
     }
