@@ -219,6 +219,37 @@ class DeepsSeekClient {
       },
     }
   }
+  checkUsage(jsonData: any) {
+    /*
+    example valid jsonData
+    {
+    "v": [
+      {
+        "v": "FINISHED",
+        "p": "status"
+      },
+      {
+        "v": 25503,
+        "p": "accumulated_token_usage"
+      }
+    ],
+    "p": "response",
+    "o": "BATCH"
+  }
+    */
+
+    // Check and get value of v for accumulated_token_usage
+    if (jsonData && Array.isArray(jsonData.v)) {
+      for (const item of jsonData.v) {
+        if (item.p === "accumulated_token_usage" && item.v !== undefined) {
+          return {
+            accumulated_token_usage: item.v,
+          }
+        }
+      }
+    }
+    return null
+  }
   async _sendResponseFromStream(input: any) {
     // const reader = response.body.getReader()
     let content = ""
@@ -267,7 +298,7 @@ class DeepsSeekClient {
 
     let buffer = ""
     let completionId = 1
-    let responseLines: any[] = []
+    // let responseLines: any[] = []
     try {
       // Process the stream until completion
       let streamCompleted = false
@@ -286,7 +317,12 @@ class DeepsSeekClient {
             total_tokens: totalTokens,
           }
           if (calculatedUsage) {
-            usage.total_tokens = calculatedUsage.accumulated_token_usage
+            const { accumulated_token_usage } = calculatedUsage
+            usage = {
+              prompt_tokens: accumulated_token_usage,
+              completion_tokens: 0,
+              total_tokens: accumulated_token_usage,
+            }
           }
           const finalChunk = buildStreamChunk({
             model,
@@ -298,9 +334,11 @@ class DeepsSeekClient {
           })
           if (sso) {
             yield encoder.encode(`data: ${JSON.stringify(finalChunk)}\n\ndata: [DONE]\n\n`)
+          } else {
+            yield finalChunk
           }
           streamCompleted = true
-          saveJsonFile(`response-${cuid()}.json`, responseLines)
+          // saveJsonFile(`response-${cuid()}.json`, responseLines)
         }
 
         // Decode the chunk and add to buffer
@@ -333,7 +371,7 @@ class DeepsSeekClient {
               }
 
               const jsonData = JSON.parse(jsonString)
-              responseLines.push(jsonData)
+              // responseLines.push(jsonData)
               // if (jsonData.type === "chat:completion") {
               //   const { data } = jsonData
               //   const { done: done2, delta_content, usage, error } = data
@@ -348,7 +386,11 @@ class DeepsSeekClient {
               //     // console.log(usage)
               //   }
               // console.log(jsonData)
-              const result = this.convertToOpenaiTextStream(jsonData, model, completionId, calculatedUsage)
+              const usageData = this.checkUsage(jsonData)
+              if (usageData && usageData.accumulated_token_usage !== undefined) {
+                calculatedUsage = usageData
+              }
+              const result = this.convertToOpenaiTextStream(jsonData, model, completionId, {})
               if (result) {
                 // console.log(result)
                 if (chatBuffer) {
@@ -390,31 +432,26 @@ class DeepsSeekClient {
     }
   }
 
-  convertToOpenaiTextStream(jsonData: any, model: string, completionId: number, report: any = null) {
+  convertToOpenaiTextStream(jsonData: any, model: string, completionId: number, report: any = {}) {
     const { v: inputData } = jsonData
-    let content, done
+    let content = ""
+    let done = false
+
     if (typeof inputData === "string") {
       content = inputData
     } else if (Array.isArray(inputData)) {
-      console.log({ inputData_length: inputData.length, inputData })
-      let i = 0
+      // let i = 0
       for (const item of inputData) {
         const { v: nextData, p, o } = item
-        console.log("here-a", i, item)
-        i += 1
+        // console.log("here-a", i, item)
+        // i += 1
         if (nextData) {
           // console.log("here-0", p)
 
           if (typeof nextData === "string" || typeof nextData === "number") {
             if (o) {
               if (o === "APPEND") {
-                content = nextData
-              }
-            }
-            if (p) {
-              console.log("here", p)
-              if (p === "accumulated_token_usage" || p === "status" || p === "FINISHED") {
-                report[p] = nextData
+                content = String(nextData)
               }
             }
           } else if (Array.isArray(nextData)) {
@@ -423,7 +460,7 @@ class DeepsSeekClient {
               if (text && type === "RESPONSE") {
                 content = text
               } else {
-                console.log("here-xxx")
+                // console.log("here-xxx")
               }
             }
           }
