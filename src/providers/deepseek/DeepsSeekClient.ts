@@ -49,6 +49,7 @@ class DeepsSeekClient {
       // await unsetSocketBusy(socket.id)
       console.log({ data })
       if (data) {
+        await kvstore.delete("use_chat_id")
         return data.chatId
       }
     }
