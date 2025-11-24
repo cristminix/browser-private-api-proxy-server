@@ -1,7 +1,3 @@
-import { DeepSeekChatPayload } from "../../providers/deepseek/types"
-import { type ChatSession } from "../../global/classes/ChatSession"
-import { getLastUserMessageContent } from "../../providers/zai/getLastUserMessageContent"
-
 export async function sendChatFinal(messages: any[], beforeSendCallback: (config: any, messages: any[]) => Promise<any>, config: any) {
   //  = getLastUserMessageContent(messages) ?? "Hai"
   const { userPrompt } = await beforeSendCallback(config, messages)
