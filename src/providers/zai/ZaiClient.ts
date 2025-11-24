@@ -48,7 +48,7 @@ class ZAIClient {
     auto_web_search: false,
        * 
       */
-        console.log(jsonBody)
+        // console.log(jsonBody)
         jsonBody.messages = transformedMessages //[{ role: "system", content: "Jawab singkat saja" }, ...jsonBody.messages]
         body = JSON.stringify(jsonBody)
       }
