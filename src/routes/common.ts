@@ -21,28 +21,45 @@ const handleFakeStreamChat = async (c: Context) => {
   const platform = c.req.query("platform") || "z.ai"
 
   console.log("FAKE STREAM CHAT")
-  c.header("Content-Type", "text/event-stream")
-  c.header("Cache-Control", "no-cache")
-  c.header("Connection", "keep-alive")
+  c.header("Content-Type", "text/event-stream; charset=utf-8")
+  // c.header("Cache-Control", "no-cache")
+  // c.header("Connection", "keep-alive")
   return streamSSE(c, async (stream) => {
     let chunks: any = platform === "z.ai" ? generateZaiFakeChatChunks() : generateMistralFakeChatChunks()
     if (platform === "deepseek") {
       chunks = generateDeepseekFakeChatChunks()
-      await stream.write(`event: ready\n`)
+      c.header("access-control-allow-credentials", "true")
+      c.header("cf-cache-status", "DYNAMIC")
+      c.header("strict-transport-security", "max-age=31536000; includeSubDomains; preload")
+      c.header("x-content-type-options", "nosniff")
+      c.header("x-ds-served-by", "chat")
+      c.header("x-ds-trace-id", cuid())
+      c.header("server", "cloudflare")
     }
     for await (const item of chunks) {
       let chunk = platform === "z.ai" ? `data: ${JSON.stringify(item)}\n\n` : `${item}\n\n`
       if (platform === "deepseek") {
-        chunk = `data: ${JSON.stringify(item)}\n\n`
+        let buffer = ""
+        const { event, data } = item
+        if (event) {
+          buffer = `event: ${event}\n`
+        }
+        if (data) {
+          buffer += `data: ${JSON.stringify(item)}\n\n`
+        }
+        await stream.write(buffer)
+      } else {
+        await stream.write(chunk)
       }
-      await stream.write(chunk)
+
       await delay(256)
     }
     if (platform === "deepseek") {
-      chunks = generateDeepseekFakeChatChunks()
-      await stream.write(`event: finish\ndata: {}\n\n`)
-      await stream.write(`event: update_session\ndata: {"updated_at":1763778803.339492}\n\n`)
-      await stream.write(`event: close\ndata: {"click_behavior":"none","auto_resume":false}\n\n`)
+      // chunks = generateDeepseekFakeChatChunks()
+      // const {event,data} = ch
+      // await stream.write(`event: finish\ndata: {}\n\n`)
+      // await stream.write(`event: update_session\ndata: {"updated_at":1763778803.339492}\n\n`)
+      // await stream.write(`event: close\ndata: {"click_behavior":"none","auto_resume":false}\n\n`)
     } else {
       const endChunk = `\n\n`
       await stream.write(endChunk)
