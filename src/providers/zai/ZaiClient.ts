@@ -7,6 +7,7 @@ import { ChatAnswerHandler } from "../../global/classes/ChatAnswerHandler"
 import { emitZaiSocket } from "./emitZaiSocket"
 import { setSocketBusy, unsetSocketBusy } from "../../db/msocket"
 import { Server as SocketIOServer } from "socket.io"
+import { emitSocket } from "src/global/fn/emitSocket"
 
 class ZAIClient {
   baseUrl = "https://chat.z.ai"
@@ -17,12 +18,7 @@ class ZAIClient {
     this.io = io
     this.chatHandler = chatHandler
   }
-  async fetchWithBrowserProxy(
-    userPrompt: string,
-    realModel: string,
-    transformedMessages: any,
-    thinking: boolean
-  ) {
+  async fetchWithBrowserProxy(userPrompt: string, realModel: string, transformedMessages: any, thinking: boolean) {
     const prompt = userPrompt
     let data: any = { success: false }
     const requestId = cuid()
@@ -36,13 +32,14 @@ class ZAIClient {
       data = await this.chatHandler.waitForAnswer(socket.id, requestId)
       await unsetSocketBusy(socket.id)
     }
+    let jsonBody: any = {}
     // console.log(data.phase)
     if (data.phase === "FETCH") {
       console.log("--Sending request to z.ai")
       let { url, body, headers } = data
       // console.log({ url, body, headers })
       if (body) {
-        const jsonBody = JSON.parse(body)
+        jsonBody = JSON.parse(body)
         jsonBody.features.enable_thinking = false
         // jsonBody.features.auto_web_search = true
         jsonBody.features.web_search = false
@@ -51,7 +48,7 @@ class ZAIClient {
     auto_web_search: false,
        * 
       */
-        // console.log(jsonBody)
+        console.log(jsonBody)
         jsonBody.messages = transformedMessages //[{ role: "system", content: "Jawab singkat saja" }, ...jsonBody.messages]
         body = JSON.stringify(jsonBody)
       }
@@ -60,6 +57,10 @@ class ZAIClient {
         headers: { ...headers },
         body,
       })
+      // await emitSocket(this.io, "zai-proxy", "chat-reload", {
+      //   chatId: jsonBody.chat_id,
+      //   requestId: cuid(),
+      // })
       return response
     }
     return null
@@ -67,31 +68,20 @@ class ZAIClient {
   get chat() {
     return {
       completions: {
-        create: async (
-          params: any,
-          requestOption: any = {},
-          direct = false
-        ) => {
+        create: async (params: any, requestOption: any = {}, direct = false) => {
           let { model: requstModel, ...options } = params
 
           const defaultModel = "glm-4.6"
 
           const transformedMessages = transformMessages(options.messages)
 
-          const userPrompt = getLastUserMessageContent(
-            transformedMessages
-          ) as string
+          const userPrompt = getLastUserMessageContent(transformedMessages) as string
 
           const realModel = defaultModel
           // console.log({ realModel, endpoint, signature })
           // return
           const thinking = false
-          const response = await this.fetchWithBrowserProxy(
-            userPrompt,
-            realModel,
-            transformedMessages,
-            thinking
-          )
+          const response = await this.fetchWithBrowserProxy(userPrompt, realModel, transformedMessages, thinking)
 
           // await makeStreamCompletion(response, true, realModel, "", [])
 
@@ -103,9 +93,7 @@ class ZAIClient {
           if (params.stream) {
             return this.makeStreamCompletion(response, direct, realModel)
           }
-          return this._sendResponseFromStream(
-            this.makeStreamCompletion(response, false, realModel)
-          )
+          return this._sendResponseFromStream(this.makeStreamCompletion(response, false, realModel))
         },
       },
     }
@@ -141,11 +129,7 @@ class ZAIClient {
   async *makeStreamCompletion(response: Response, sso = false, model: string) {
     // Validate response with more detailed error message
     if (!response.ok) {
-      throw new Error(
-        `API request failed with status ${
-          response.status
-        } and message: ${await response.text()}`
-      )
+      throw new Error(`API request failed with status ${response.status} and message: ${await response.text()}`)
     }
 
     // Check if response body exists
@@ -190,9 +174,7 @@ class ZAIClient {
               usage,
               done: true,
             })
-            yield encoder.encode(
-              `data: ${JSON.stringify(finalChunk)}\n\ndata: [DONE]\n\n`
-            )
+            yield encoder.encode(`data: ${JSON.stringify(finalChunk)}\n\ndata: [DONE]\n\n`)
           }
           streamCompleted = true
         }
@@ -242,12 +224,7 @@ class ZAIClient {
                   // console.log(usage)
                 }
                 // console.log(jsonData)
-                const result = this.convertToOpenaiTextStream(
-                  jsonData,
-                  model,
-                  completionId,
-                  calculatedUsage
-                )
+                const result = this.convertToOpenaiTextStream(jsonData, model, completionId, calculatedUsage)
                 if (result) {
                   // console.log(result)
 
@@ -281,12 +258,7 @@ class ZAIClient {
     }
   }
 
-  convertToOpenaiTextStream(
-    jsonData: any,
-    model: string,
-    completionId: number,
-    usage: any = null
-  ) {
+  convertToOpenaiTextStream(jsonData: any, model: string, completionId: number, usage: any = null) {
     const { data: inputData } = jsonData
     const { done, delta_content: text, edit_content: textEdit } = inputData
     const content = text ? text : textEdit
