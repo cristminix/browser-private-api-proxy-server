@@ -20,6 +20,8 @@ app.get("/chat", async (c: Context) => {
     appName = "mistral-proxy"
   } else if (platform === "deepseek") {
     appName = "deepseek-proxy"
+  } else if (platform === "gemini") {
+    appName = "gemini-proxy"
   }
   const socket = await emitSocket(ioInstance, appName, "chat", {
     payload: { prompt },
