@@ -5,7 +5,7 @@ import { loadJsonFile } from "../../global/fn/loadJsonFile"
 
 const main = async () => {
   const buffer = await fs.readFile("src/providers/gemini/response-002.txt", "utf-8")
-  const bufferLines = await loadJsonFile("src/providers/gemini/responses/response-cmigt8du900004ctdf0ae66er.json")
+  const bufferLines = await loadJsonFile("src/providers/gemini/responses/response-cmigv6edy000b6ctdf1h6bzye.json")
   // const buffer2 = bufferLines.join(" ")
   let lastLine = ""
   for (const bfl of bufferLines) {
