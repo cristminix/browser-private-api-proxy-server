@@ -34,15 +34,10 @@ class GeminiClient {
   }
   async getCurrentChatId() {
     const requestId = cuid()
-    const socket = await emitSocket(
-      this.io,
-      "gemini-proxy",
-      "get-current-chat",
-      {
-        payload: {},
-        requestId,
-      }
-    )
+    const socket = await emitSocket(this.io, "gemini-proxy", "get-current-chat", {
+      payload: {},
+      requestId,
+    })
     if (socket) {
       console.log(socket.id)
       // await setSocketBusy(socket.id)
@@ -94,9 +89,7 @@ class GeminiClient {
   ) {
     while (!config.streamDone) {
       // `answer_stream_${requestId}`
-      const answer = await this.chatHandler.waitForAnswerKey(
-        `answer_stream_${requestId}`
-      )
+      const answer = await this.chatHandler.waitForAnswerKey(`answer_stream_${requestId}`)
       // console.log(answer)
       const line = answer.content
       bufferLines.push(line)
@@ -108,10 +101,7 @@ class GeminiClient {
       if (buffer.includes("[DONE]")) {
         console.log("STREAM_DONE")
         config.streamDone = true
-        saveJsonFile(
-          `src/providers/gemini/responses/response-${requestId}.json`,
-          bufferLines
-        )
+        saveJsonFile(`src/providers/gemini/responses/response-${requestId}.json`, bufferLines)
 
         const chunkData = {
           content: "",
@@ -125,10 +115,7 @@ class GeminiClient {
       } else {
         const content = parseResponseBody(line)
         if (content.length > config.lastContent.length) {
-          let streamContent = content.substr(
-            config.lastContent.length,
-            content.length - config.lastContent.length
-          )
+          let streamContent = content.substr(config.lastContent.length, content.length - config.lastContent.length)
           config.lastContent = content
           if (streamContent.length > 0) {
             const chunkData = {
@@ -186,12 +173,7 @@ class GeminiClient {
     await kvstore.delete(key)
     await kvstore.delete(timestampKey)
   }
-  async *fetchWithBrowserProxy(
-    messages: any,
-    realModel: string,
-    thinking: boolean,
-    chatBuffer: any
-  ) {
+  async *fetchWithBrowserProxy(messages: any, realModel: string, thinking: boolean, chatBuffer: any) {
     const tmpChatId = await this.generateTmpChatId()
     console.log({ tmpChatId })
     this.config = {
@@ -211,10 +193,7 @@ class GeminiClient {
       //   await this.unsetTempChatId()
       // }
     }
-    const { userPrompt: prompt } = await this.beforeSendCallback(
-      this.config,
-      messages
-    )
+    const { userPrompt: prompt } = await this.beforeSendCallback(this.config, messages)
 
     let data: any = { success: false }
     console.log({ messages, prompt })
@@ -238,9 +217,7 @@ class GeminiClient {
         let lastContent = ""
         while (!streamDone) {
           // `answer_stream_${requestId}`
-          const answer = await self.chatHandler.waitForAnswerKey(
-            `answer_stream_${requestId}`
-          )
+          const answer = await self.chatHandler.waitForAnswerKey(`answer_stream_${requestId}`)
           // console.log(answer)
           const line = answer.content
           bufferLines.push(line)
@@ -252,10 +229,7 @@ class GeminiClient {
           if (buffer.includes("[DONE]")) {
             console.log("STREAM_DONE")
             streamDone = true
-            saveJsonFile(
-              `src/providers/gemini/responses/response-${requestId}.json`,
-              bufferLines
-            )
+            saveJsonFile(`src/providers/gemini/responses/response-${requestId}.json`, bufferLines)
 
             // const chunkData = {
             //   content: "",
@@ -270,14 +244,11 @@ class GeminiClient {
             chatBuffer.content += content
           }
           if (content.length > lastContent.length) {
-            let streamContent = content.substr(
-              lastContent.length,
-              content.length - lastContent.length
-            )
+            let streamContent = content.substr(lastContent.length, content.length - lastContent.length)
             lastContent = content
             if (streamContent.length > 0) {
               const chunkData = {
-                content: unescapeJs(unescapeJs(streamContent)),
+                content: streamContent,
                 index: completionId++,
                 model: "gemini",
                 done: streamDone,
@@ -302,12 +273,7 @@ class GeminiClient {
   get chat() {
     return {
       completions: {
-        create: async (
-          params: any,
-          requestOption: any = {},
-          direct = false,
-          chatBuffer: any = { content: "" }
-        ) => {
+        create: async (params: any, requestOption: any = {}, direct = false, chatBuffer: any = { content: "" }) => {
           let { model: requstModel, ...options } = params
 
           const defaultModel = "gemini"
@@ -324,21 +290,9 @@ class GeminiClient {
           // Check if response is valid before proceeding
 
           if (params.stream) {
-            return this.fetchWithBrowserProxy(
-              options.messages,
-              realModel,
-              thinking,
-              chatBuffer
-            )
+            return this.fetchWithBrowserProxy(options.messages, realModel, thinking, chatBuffer)
           }
-          return this._sendResponseFromStream(
-            this.fetchWithBrowserProxy(
-              options.messages,
-              realModel,
-              thinking,
-              chatBuffer
-            )
-          )
+          return this._sendResponseFromStream(this.fetchWithBrowserProxy(options.messages, realModel, thinking, chatBuffer))
         },
       },
     }
