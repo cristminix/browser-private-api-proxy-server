@@ -51,7 +51,7 @@ export function setupSocketIO(server: HttpServer, chatHandlerAnswer: ChatAnswerH
       if (requestId) chatHandlerAnswer.notifyAnswer(socket.id, requestId, data)
     })
     socket.on("answer-stream", (data) => {
-      console.log(data)
+      // console.log(data)
       const { requestId } = data
       if (requestId) chatHandlerAnswer.notifyAnswerKey(`answer_stream_${requestId}`, data)
     })

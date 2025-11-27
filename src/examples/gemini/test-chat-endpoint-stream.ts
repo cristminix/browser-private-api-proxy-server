@@ -1,6 +1,6 @@
 // import { io } from "socket.io-client"
 
-import { makeStreamCompletion } from "../../providers/zai/makeStreamCompletion"
+import { makeStreamCompletion } from "../../providers/gemini/makeStreamCompletion"
 import { parseResponseBody } from "../../providers/gemini/parseResponseBody"
 
 // import fetch from "node:fetch"
@@ -8,43 +8,21 @@ const main = async () => {
   // Get prompt from CLI arguments or use default
   const prompt = process.argv[2] || "Gimme the recommended places in the world"
   // const startTime = performance.now()
-  fetch(`http://127.0.0.1:4001/api/chat?platform=gemini&prompt=${encodeURIComponent(prompt)}`)
-    .then((response) => response.json())
-    .then((data) => {
-      console.log(parseResponseBody(data.content))
-    })
+  console.log("--Sending request to gemini")
+  const response = await fetch(`http://127.0.0.1:4001/api/chat-stream?platform=gemini&prompt=${encodeURIComponent(prompt)}`)
 
-  return
-  if (data.phase === "FETCH") {
-    console.log("--Sending request to z.ai")
-    let { url, body, headers } = data
-    // console.log({ url, body, headers })
-    if (body) {
-      const jsonBody = JSON.parse(body)
-      jsonBody.features.enable_thinking = false
-      // jsonBody.features.auto_web_search = true
-      jsonBody.features.web_search = true
-      /**
-       web_search: false,
-    auto_web_search: false,
-       * 
-      */
-      // console.log(jsonBody)
-      jsonBody.messages = [{ role: "system", content: "Jawab singkat saja" }, ...jsonBody.messages]
-      body = JSON.stringify(jsonBody)
+  for await (const chunk of makeStreamCompletion(response, {
+    sso: false,
+    model: "gemini",
+  })) {
+    // console.log(chunk)
+    const bufferChunk = chunk.choices[0].delta.content
+    if (bufferChunk) {
+      // outputBuffer_content += bufferChunk
+      process.stdout.write(bufferChunk)
     }
-    const response = await fetch(`https://chat.z.ai${url}`, {
-      method: "POST",
-      headers: { ...headers },
-      body,
-    })
-    await makeStreamCompletion(response, { sso: false, model: "glm" })
-    // await fetch("http://127.0.0.1:4001/api/reload-chat")
-  } else {
-    //   const jsonResponseStreamInput = data.body
-    //   const text = parseResponseBody(jsonResponseStreamInput)
-    //   console.log(text)
   }
+  console.log("\n")
 }
 main().catch((e) => {
   console.error(e)
