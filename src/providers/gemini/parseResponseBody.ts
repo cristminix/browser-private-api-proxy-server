@@ -11,7 +11,6 @@ export const parseResponseBody = (jsonStreamTextInput: string) => {
   }
   return outBuffer.trim()
 }
-function isImageData(inputJson: any) {}
 export function parseResponseLine(line: any) {
   let outBuffer = null
   if (line.trim() && !line.startsWith(")]}'") && line.includes("wrb.fr")) {

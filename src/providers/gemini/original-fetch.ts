@@ -1,4 +1,41 @@
 import { makeStreamCompletionOrig } from "./makeStreamCompletionOrig"
+import { marked } from "marked"
+import { markedTerminal } from "marked-terminal"
+
+/**
+ * Detects and cleans invalid markdown code blocks in content using marked library
+ * @param content The content to check for invalid markdown code blocks
+ * @returns Cleaned content with invalid trailing backticks removed
+ */
+const cleanInvalidMarkdownCodeBlocks = (content: string, chunk): string => {
+  // Check if content ends with '```' but doesn't contain a proper closing '\n```'
+  // This indicates an incomplete/invalid markdown code block
+
+  // Use marked to verify if this is indeed an invalid markdown
+  // console.log(chunk)
+  try {
+    // Try to parse the content with marked
+    const tokens = marked.lexer(content)
+
+    // Check if there's an unclosed code block at the end
+    const lastToken = tokens[tokens.length - 1]
+    if (lastToken && lastToken.type === "code") {
+      // This is indeed an unclosed code block, remove the trailing backticks
+      if (chunk.finish_reason !== "done") {
+        if (content.endsWith("```")) {
+          {
+            return content.slice(0, -3).trim()
+          }
+        }
+      }
+    }
+  } catch (error) {
+    // If marked parsing fails, fall back to simple detection
+    console.warn("Marked parsing failed, falling back to simple detection:", error)
+    return content.slice(0, -3)
+  }
+  return content
+}
 
 const main = async () => {
   const response = await fetch("https://gemini.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/StreamGenerate?bl=boq_assistant-bard-web-server_20251125.06_p0&f.sid=-3323142058221652732&hl=id&_reqid=4645571&rt=c", {
@@ -40,8 +77,56 @@ const main = async () => {
   })
   console.log(response.ok)
   const chunks = makeStreamCompletionOrig(response, { model: "", sso: false })
+  let lastContent = ""
+  let fullContent = "" // Track the full accumulated content
+  let partialContent = ""
+
   for await (const chunk of chunks) {
-    process.stdout.write(chunk.choices[0].delta.content)
+    let content = chunk.choices[0].delta.content
+    // console.log(chunk.finish_reason)
+    if (chunk.finish_reason === "done") {
+      content = fullContent
+      // console.log(content)
+    }
+    // Check if this is new content (not empty)
+    if (content && content.trim() !== "") {
+      // Clean invalid markdown code blocks from content using the dedicated function
+      const cleanedContent = cleanInvalidMarkdownCodeBlocks(content, chunk)
+      fullContent = content
+
+      // Since each chunk contains the full content, we need to extract only the new part
+      if (cleanedContent.length > lastContent.length) {
+        // Extract only the new part that wasn't in the previous content
+        partialContent = cleanedContent.substr(lastContent.length, cleanedContent.length - lastContent.length)
+
+        // console.log({
+        //   content: cleanedContent,
+        //   lastContent,
+        //   partialContent,
+        //   contentLength: cleanedContent.length,
+        //   lastContentLength: lastContent.length,
+        //   isNewContent: true,
+        // })
+        // Update the full content and write only the new part
+        process.stdout.write(partialContent)
+      } else if (lastContent === "") {
+        // First chunk, use the entire content
+        partialContent = cleanedContent
+
+        fullContent = cleanedContent
+        // console.log({
+        //   content: cleanedContent,
+        //   lastContent,
+        //   partialContent,
+        //   contentLength: cleanedContent.length,
+        //   lastContentLength: lastContent.length,
+        //   isFirstChunk: true,
+        // })
+        process.stdout.write(partialContent)
+      }
+      // Always update lastContent to track what we've seen so far
+      lastContent = cleanedContent
+    }
   }
   console.log("")
 }

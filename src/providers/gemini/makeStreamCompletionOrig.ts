@@ -123,12 +123,34 @@ async function* processStreamWithYield(
   const reader = response.body!.getReader()
   const decoder = new TextDecoder()
   let index = 0
+  let hasYieldedFinalChunk = false
+
   try {
     while (state.validStream) {
       const { done, value } = await reader.read()
 
       if (done) {
-        handleStreamCompletion(state, options)
+        // Handle stream completion and yield the final chunk if not in SSO mode
+        const totalTokens = state.promptTokens + state.completionTokens
+        const usage = state.calculatedUsage || {
+          prompt_tokens: state.promptTokens,
+          completion_tokens: state.completionTokens,
+          total_tokens: totalTokens,
+        }
+
+        const finalChunk = buildStreamChunk({
+          model: options.model,
+          index: state.completionId,
+          finishReason: "done",
+          content: "",
+          usage,
+          done: true,
+        })
+        // console.log({ finalChunk })
+        hasYieldedFinalChunk = true
+        yield finalChunk
+
+        // handleStreamCompletion(state, options)
         break
       }
 
@@ -145,6 +167,10 @@ async function* processStreamWithYield(
         if (line.trim()) {
           const result = await processLineWithYield(line, state, options, index++)
           if (result) {
+            // Check if this is a final chunk
+            if (result.finish_reason) {
+              hasYieldedFinalChunk = true
+            }
             yield result
           }
         }
@@ -170,33 +196,26 @@ function handleStreamCompletion(
 ): void {
   const { sso, model, onData, onDone } = options
 
-  // Send final event if in SSO mode
-  if (sso) {
-    const totalTokens = state.promptTokens + state.completionTokens
-    const usage = state.calculatedUsage || {
-      prompt_tokens: state.promptTokens,
-      completion_tokens: state.completionTokens,
-      total_tokens: totalTokens,
-    }
-
-    const finalChunk = buildStreamChunk({
-      model,
-      index: state.completionId,
-      finishReason: "done",
-      content: "",
-      usage,
-      done: true,
-    })
-
-    if (onData) onData(finalChunk)
+  // Send final event for both SSO and non-SSO modes
+  const totalTokens = state.promptTokens + state.completionTokens
+  const usage = state.calculatedUsage || {
+    prompt_tokens: state.promptTokens,
+    completion_tokens: state.completionTokens,
+    total_tokens: totalTokens,
   }
 
+  const finalChunk = buildStreamChunk({
+    model,
+    index: state.completionId,
+    finishReason: "stop",
+    content: "",
+    usage,
+    done: true,
+  })
+
+  if (onData) onData(finalChunk)
+
   if (onDone) {
-    const usage = state.calculatedUsage || {
-      prompt_tokens: state.promptTokens,
-      completion_tokens: state.completionTokens,
-      total_tokens: state.promptTokens + state.completionTokens,
-    }
     onDone(usage)
   }
 
@@ -221,7 +240,18 @@ async function processLineWithYield(
   }
 
   try {
-    return buildStreamChunk({ content: parseResponseBody(line), model, index })
+    const content = parseResponseBody(line)
+
+    // Check if this is the end of the stream
+    // If the content is empty or the line indicates completion, set finish_reason
+    const isCompletionEnd = !content || line.includes("DONE") || line.includes("finished")
+
+    return buildStreamChunk({
+      content,
+      model,
+      index,
+      finishReason: isCompletionEnd ? "stop" : null,
+    })
   } catch (err) {
     console.error("Error parsing stream line:", line, err)
 
