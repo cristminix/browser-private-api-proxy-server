@@ -8,5 +8,9 @@ import * as path from "path"
  * @param data - The chat history data to save
  */
 export async function saveJsonFile(filePath: string, data: any[]) {
+  const dir = path.dirname(filePath);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8")
 }

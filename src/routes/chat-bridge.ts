@@ -75,7 +75,9 @@ app.get("/chat-stream", async (c: Context) => {
       let lastContent = ""
       while (!streamDone) {
         // `answer_stream_${requestId}`
-        const answer = await chatHandlerAnswer.waitForAnswerKey(`answer_stream_${requestId}`)
+        const answer = await chatHandlerAnswer.waitForAnswerKey(
+          `answer_stream_${requestId}`
+        )
         // console.log(answer)
         const line = answer.content
         bufferLines.push(line)
@@ -87,7 +89,10 @@ app.get("/chat-stream", async (c: Context) => {
         if (buffer.includes("[DONE]")) {
           console.log("STREAM_DONE")
           streamDone = true
-          saveJsonFile(`src/providers/gemini/responses/response-${requestId}.json`, bufferLines)
+          saveJsonFile(
+            `src/providers/gemini/responses/response-${requestId}.json`,
+            bufferLines
+          )
 
           const chunkData = {
             content: "",
@@ -99,7 +104,10 @@ app.get("/chat-stream", async (c: Context) => {
         } else {
           const content = parseResponseBody(line)
           if (content.length > lastContent.length) {
-            let streamContent = content.substr(lastContent.length, content.length - lastContent.length)
+            let streamContent = content.substr(
+              lastContent.length,
+              content.length - lastContent.length
+            )
             lastContent = content
             if (streamContent.length > 0) {
               const chunkData = {
@@ -109,7 +117,7 @@ app.get("/chat-stream", async (c: Context) => {
               }
               yield buildStreamChunk(chunkData)
             } else {
-              console.log({ content })
+              // console.log({ content })
             }
             // console.log({ outputText2 })
           }
@@ -121,7 +129,7 @@ app.get("/chat-stream", async (c: Context) => {
       if (platform === "gemini") {
         const chunks = getAnswer()
         for await (const item of chunks) {
-          console.log({ item })
+          // console.log({ item })
           await stream.write(`data: ${JSON.stringify(item)}\n\n`)
         }
       }

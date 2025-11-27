@@ -1,6 +1,7 @@
 import { ChatCompletionRequest } from "./types/chat"
 import ZaiProvider from "../providers/zai/ZaiProvider"
 import DeepsSeekProvider from "../providers/deepseek/DeepsSeekProvider"
+import GeminiProvider from "../providers/gemini/GeminiProvider"
 async function createCompletions(
   chatRequest: ChatCompletionRequest,
   io: any,
@@ -12,6 +13,8 @@ async function createCompletions(
     providerApi = new ZaiProvider(io, chatHandler)
   } else if (requestModel === "deepseek") {
     providerApi = new DeepsSeekProvider(io, chatHandler)
+  } else if (requestModel === "gemini") {
+    providerApi = new GeminiProvider(io, chatHandler)
   }
   //@ts-ignore
   // const messages = await getChatRequestMessages(chatRequest, providerApi)
