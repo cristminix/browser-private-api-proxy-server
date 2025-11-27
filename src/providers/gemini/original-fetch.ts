@@ -83,10 +83,8 @@ const main = async () => {
 
   for await (const chunk of chunks) {
     let content = chunk.choices[0].delta.content
-    // console.log(chunk.finish_reason)
     if (chunk.finish_reason === "done") {
       content = fullContent
-      // console.log(content)
     }
     // Check if this is new content (not empty)
     if (content && content.trim() !== "") {
@@ -96,35 +94,16 @@ const main = async () => {
 
       // Since each chunk contains the full content, we need to extract only the new part
       if (cleanedContent.length > lastContent.length) {
-        // Extract only the new part that wasn't in the previous content
         partialContent = cleanedContent.substr(lastContent.length, cleanedContent.length - lastContent.length)
 
-        // console.log({
-        //   content: cleanedContent,
-        //   lastContent,
-        //   partialContent,
-        //   contentLength: cleanedContent.length,
-        //   lastContentLength: lastContent.length,
-        //   isNewContent: true,
-        // })
-        // Update the full content and write only the new part
         process.stdout.write(partialContent)
       } else if (lastContent === "") {
-        // First chunk, use the entire content
         partialContent = cleanedContent
 
         fullContent = cleanedContent
-        // console.log({
-        //   content: cleanedContent,
-        //   lastContent,
-        //   partialContent,
-        //   contentLength: cleanedContent.length,
-        //   lastContentLength: lastContent.length,
-        //   isFirstChunk: true,
-        // })
+
         process.stdout.write(partialContent)
       }
-      // Always update lastContent to track what we've seen so far
       lastContent = cleanedContent
     }
   }
