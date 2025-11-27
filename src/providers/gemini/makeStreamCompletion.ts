@@ -404,7 +404,7 @@ async function processChatCompletion(
   //   return
   // }
 
-  const result = jsonData
+  const result = jsonData as any
 
   if (result) {
     if (onData) {

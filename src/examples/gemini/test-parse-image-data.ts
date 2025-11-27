@@ -1,6 +1,6 @@
 // import fetch from "node:fetch"
 import * as fs from "fs/promises"
-import { parseResponseBody } from "../../providers/gemini/parseResponseBody"
+import { getImageData, parseResponseBody } from "../../providers/gemini/parseResponseBody"
 import { loadJsonFile } from "../../global/fn/loadJsonFile"
 import { imageData } from "./imageData"
 

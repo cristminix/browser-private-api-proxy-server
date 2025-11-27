@@ -26,15 +26,16 @@ export function parseResponseLine(line: any) {
             const [content] = contentJson
             // console.log({ content })
             if (content) outBuffer = content
-            if (content.includes("http://googleusercontent.com/image_generation_content/0")) {
+            const imgRegex = /http\:\/\/googleusercontent\.com\/image_generation_content\/\d+/
+            if (content.match(imgRegex)) {
               // console.log(JSON.stringify(inputJson, null, 2) + "\n----\n")
               const imageList = getImageData(inputJson)
               let imageStr = ""
               for (const img of imageList) {
-                imageStr += `![${img.filename}](${img.url})`
+                imageStr += `\n\n![${img.filename}](${img.url})`
               }
               // console.log(imageList)
-              outBuffer = content.replace("http://googleusercontent.com/image_generation_content/0", imageStr)
+              outBuffer = content.replace(imgRegex, imageStr)
             }
           } catch (parseError) {
             // console.error("Error parsing content JSON:", parseError, parsed[2])
