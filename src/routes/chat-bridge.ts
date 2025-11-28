@@ -9,7 +9,6 @@ import { streamSSE } from "hono/streaming"
 import { parseResponseBody } from "../providers/gemini/parseResponseBody"
 import { buildStreamChunk } from "../openai/buildStreamChunk"
 import { saveJsonFile } from "../global/fn/saveJsonFile"
-const chatHandlerAnswer: ChatAnswerHandler = ChatAnswerHandler.getInstance()
 
 const app = new Hono()
 app.get("/chat", async (c: Context) => {
@@ -34,6 +33,7 @@ app.get("/chat", async (c: Context) => {
   if (socket) {
     console.log(socket.id)
     await setSocketBusy(socket.id)
+    const chatHandlerAnswer: ChatAnswerHandler = ChatAnswerHandler.getInstance()
 
     data = await chatHandlerAnswer.waitForAnswer(socket.id, requestId)
     await unsetSocketBusy(socket.id)
@@ -75,9 +75,9 @@ app.get("/chat-stream", async (c: Context) => {
       let lastContent = ""
       while (!streamDone) {
         // `answer_stream_${requestId}`
-        const answer = await chatHandlerAnswer.waitForAnswerKey(
-          `answer_stream_${requestId}`
-        )
+        const chatHandlerAnswer: ChatAnswerHandler = ChatAnswerHandler.getInstance()
+
+        const answer = await chatHandlerAnswer.waitForAnswerKey(`answer_stream_${requestId}`)
         // console.log(answer)
         const line = answer.content
         bufferLines.push(line)
@@ -89,10 +89,7 @@ app.get("/chat-stream", async (c: Context) => {
         if (buffer.includes("[DONE]")) {
           console.log("STREAM_DONE")
           streamDone = true
-          saveJsonFile(
-            `src/providers/gemini/responses/response-${requestId}.json`,
-            bufferLines
-          )
+          saveJsonFile(`src/providers/gemini/responses/response-${requestId}.json`, bufferLines)
 
           const chunkData = {
             content: "",
@@ -104,10 +101,7 @@ app.get("/chat-stream", async (c: Context) => {
         } else {
           const content = parseResponseBody(line)
           if (content.length > lastContent.length) {
-            let streamContent = content.substr(
-              lastContent.length,
-              content.length - lastContent.length
-            )
+            let streamContent = content.substr(lastContent.length, content.length - lastContent.length)
             lastContent = content
             if (streamContent.length > 0) {
               const chunkData = {
@@ -156,6 +150,8 @@ app.post("/chat", async (c: Context) => {
     await setSocketBusy(socket.id)
 
     console.log(socket.id)
+    const chatHandlerAnswer: ChatAnswerHandler = ChatAnswerHandler.getInstance()
+
     data = await chatHandlerAnswer.waitForAnswer(socket.id, requestId)
     await unsetSocketBusy(socket.id)
   }
@@ -182,6 +178,7 @@ app.get("/get-current-chat", async (c: Context) => {
   if (socket) {
     console.log(socket.id)
     // await setSocketBusy(socket.id)
+    const chatHandlerAnswer: ChatAnswerHandler = ChatAnswerHandler.getInstance()
 
     data = await chatHandlerAnswer.waitForAnswerKey("return-chat-id")
     // await unsetSocketBusy(socket.id)

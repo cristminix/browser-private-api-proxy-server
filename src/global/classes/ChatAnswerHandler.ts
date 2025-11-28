@@ -42,7 +42,9 @@ class ChatAnswerHandler extends EventEmitter {
     })
   }
   notifyAnswer(socketId: string, requestId: string, data: any) {
-    this.emit(`answer_${socketId}_${requestId}`, data)
+    const key = `answer_${socketId}_${requestId}`
+    console.log("notify answer key:" + key)
+    this.emit(key, data)
   }
   notifyAnswerKey(key: string, data: any) {
     this.emit(`${key}`, data)
