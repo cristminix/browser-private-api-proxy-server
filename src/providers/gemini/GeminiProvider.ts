@@ -1,8 +1,4 @@
-import {
-  ChatCompletionRequest,
-  ChatResponse,
-  ChatResponseStream,
-} from "../../openai/types/chat"
+import { ChatCompletionRequest, ChatResponse, ChatResponseStream } from "../../openai/types/chat"
 import GeminiClient from "./GeminiClient"
 
 class GeminiProvider {
@@ -38,7 +34,7 @@ class GeminiProvider {
     }
 
     const assistantMessage = { role: "assistant", content: chatBuffer.content }
-    console.log(assistantMessage)
+    // console.log(assistantMessage)
     await this.client.afterSendCallback(assistantMessage)
   }
 

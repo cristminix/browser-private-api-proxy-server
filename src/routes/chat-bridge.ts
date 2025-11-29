@@ -71,11 +71,7 @@ app.get("/chat-stream", async (c: Context) => {
     // await unsetSocketBusy(socket.id)
     const bufferLines: any[] = []
     function cleanContent(input) {
-      return input
-        .replace("\\*", "*")
-        .replace("\\*", "*")
-        .replace("\\`", "`")
-        .replace("\\.", ".")
+      return input.replace("\\*", "*").replace("\\*", "*").replace("\\`", "`").replace("\\.", ".")
     }
     async function* getAnswer() {
       let streamDone = false
@@ -85,12 +81,9 @@ app.get("/chat-stream", async (c: Context) => {
       let partialContent = ""
       while (!streamDone) {
         // `answer_stream_${requestId}`
-        const chatHandlerAnswer: ChatAnswerHandler =
-          ChatAnswerHandler.getInstance()
+        const chatHandlerAnswer: ChatAnswerHandler = ChatAnswerHandler.getInstance()
 
-        const answer = await chatHandlerAnswer.waitForAnswerKey(
-          `answer_stream_${requestId}`
-        )
+        const answer = await chatHandlerAnswer.waitForAnswerKey(`answer_stream_${requestId}`)
         // console.log(answer)
         const line = answer.content
         bufferLines.push(line)
@@ -102,10 +95,7 @@ app.get("/chat-stream", async (c: Context) => {
         if (buffer.includes("[DONE]")) {
           console.log("STREAM_DONE")
           streamDone = true
-          saveJsonFile(
-            `src/providers/gemini/responses/response-${requestId}.json`,
-            bufferLines
-          )
+          saveJsonFile(`src/providers/gemini/responses/response-${requestId}.json`, bufferLines)
         }
         let content = cleanContent(parseResponseBody(line))
         if (streamDone) {
@@ -120,10 +110,7 @@ app.get("/chat-stream", async (c: Context) => {
 
           // Since each chunk contains the full content, we need to extract only the new part
           if (cleanedContent.length > lastContent.length) {
-            partialContent = cleanedContent.substr(
-              lastContent.length,
-              cleanedContent.length - lastContent.length
-            )
+            partialContent = cleanedContent.substr(lastContent.length, cleanedContent.length - lastContent.length)
 
             const chunkData = {
               content: partialContent,
@@ -199,6 +186,8 @@ app.get("/get-current-chat", async (c: Context) => {
     appName = "mistral-proxy"
   } else if (platform === "deepseek") {
     appName = "deepseek-proxy"
+  } else if (platform === "gemini") {
+    appName = "gemini-proxy"
   }
   const socket = await emitSocket(ioInstance, appName, "get-current-chat", {
     payload: {},

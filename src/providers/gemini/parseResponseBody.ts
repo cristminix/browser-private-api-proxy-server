@@ -35,11 +35,9 @@ export function parseResponseLine(line: any) {
                 // p1 is the captured character, e.g., '<'
                 return p1
               })
-            const imgRegex =
-              /http\:\/\/googleusercontent\.com\/image_generation_content\/\d+/
+            const imgRegex = /http\:\/\/googleusercontent\.com\/image_generation_content\/\d+/
             //http://googleusercontent.com/youtube_content/4
-            const imgYtRegex =
-              /http\:\/\/googleusercontent\.com\/youtube_content\/\d+/
+            const imgYtRegex = /http\:\/\/googleusercontent\.com\/youtube_content\/\d+/
             if (content.match(imgRegex) || content.match(imgYtRegex)) {
               // console.log(JSON.stringify(inputJson, null, 2) + "\n----\n")
               const imageList = getImageData(inputJson)
@@ -57,7 +55,7 @@ export function parseResponseLine(line: any) {
       }
     } catch (e) {
       // Skip lines that are not in expected format
-      console.error("Error parsing line:", e, line.substring(0, 100))
+      // console.error("Error parsing line:", e, line.substring(0, 100))
     }
   }
   return outBuffer
@@ -132,19 +130,12 @@ function extractImagesFromNestedArray(arr: any): Array<{
           // Cek apakah array ini memiliki struktur seperti data gambar
           // Berdasarkan contoh imageData, data gambar memiliki struktur:
           // [null, 1, filename, url, null, encoded_data, ...]
-          if (
-            item.length >= 4 &&
-            item[3] &&
-            typeof item[3] === "string" &&
-            (item[3].includes("googleusercontent.com") ||
-              item[3].includes("lh3.googleusercontent.com"))
-          ) {
+          if (item.length >= 4 && item[3] && typeof item[3] === "string" && (item[3].includes("googleusercontent.com") || item[3].includes("lh3.googleusercontent.com"))) {
             // Ini tampaknya adalah entri gambar
             const imageDataInfo = {
               filename: typeof item[2] === "string" ? item[2] : null,
               url: typeof item[3] === "string" ? item[3] : null,
-              mimeType:
-                item[10] && typeof item[10] === "string" ? item[10] : null,
+              mimeType: item[10] && typeof item[10] === "string" ? item[10] : null,
               dimensions: Array.isArray(item[14]) ? item[14] : null, // [width, height, size]
               timestamp: Array.isArray(item[8]) ? item[8] : null,
             }
