@@ -14,6 +14,25 @@ export const parseResponseBody = (jsonStreamTextInput: string) => {
   }
   return outBuffer.trim()
 }
+function removeGoogleSearchUrlSimple(xmlContent) {
+  const searchPattern = /https:\/\/www\.google\.com\/search\?q=/g
+
+  // Regex untuk menemukan URL dalam tag XML manapun
+  const xmlTagPattern = /(<[^>]+>)([^<]*https:\/\/www\.google\.com\/search\?q=[^<]*)(<\/[^>]+>)/gi
+
+  let cleanedContent = xmlContent
+
+  // Process content di antara tag XML
+  cleanedContent = cleanedContent.replace(xmlTagPattern, (match, startTag, content, endTag) => {
+    const cleanedContent = content.replace(searchPattern, "")
+    return startTag + cleanedContent + endTag
+  })
+
+  // Final cleanup untuk yang terlewat
+  cleanedContent = cleanedContent.replace(searchPattern, "")
+
+  return cleanedContent
+}
 export function parseResponseLine(line: any) {
   let outBuffer = null
   if (line.trim()) {
@@ -35,6 +54,7 @@ export function parseResponseLine(line: any) {
                 // p1 is the captured character, e.g., '<'
                 return p1
               })
+            outBuffer = removeGoogleSearchUrlSimple(outBuffer)
             const imgRegex = /http\:\/\/googleusercontent\.com\/image_generation_content\/\d+/
             //http://googleusercontent.com/youtube_content/4
             const imgYtRegex = /http\:\/\/googleusercontent\.com\/youtube_content\/\d+/
