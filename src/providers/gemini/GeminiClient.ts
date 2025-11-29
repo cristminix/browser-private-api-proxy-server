@@ -17,6 +17,7 @@ import { saveJsonFile } from "../../global/fn/saveJsonFile"
 import { emitGeminiSocket } from "./emitGeminiSocket"
 import { parseResponseBody } from "./parseResponseBody"
 import unescapeJs from "unescape-js"
+import { cleanInvalidMarkdownCodeBlocks } from "./cleanInvalidMarkdownCodeBlocks"
 class GeminiClient {
   baseUrl = "https://gemini.google.com"
   io: SocketIOServer
@@ -34,10 +35,15 @@ class GeminiClient {
   }
   async getCurrentChatId() {
     const requestId = cuid()
-    const socket = await emitSocket(this.io, "gemini-proxy", "get-current-chat", {
-      payload: {},
-      requestId,
-    })
+    const socket = await emitSocket(
+      this.io,
+      "gemini-proxy",
+      "get-current-chat",
+      {
+        payload: {},
+        requestId,
+      }
+    )
     if (socket) {
       console.log(socket.id)
       // await setSocketBusy(socket.id)
@@ -78,6 +84,7 @@ class GeminiClient {
       userPrompt,
     }
   }
+
   async *getAnswer(
     requestId: string,
     bufferLines: any[],
@@ -85,11 +92,22 @@ class GeminiClient {
       streamDone: false,
       completionId: 0,
       lastContent: "",
+      fullContent: "",
+      partialContent: "",
     }
   ) {
+    function cleanContent(input) {
+      return input
+        .replace("\\*", "*")
+        .replace("\\*", "*")
+        .replace("\\`", "`")
+        .replace("\\.", ".")
+    }
     while (!config.streamDone) {
       // `answer_stream_${requestId}`
-      const answer = await this.chatHandler.waitForAnswerKey(`answer_stream_${requestId}`)
+      const answer = await this.chatHandler.waitForAnswerKey(
+        `answer_stream_${requestId}`
+      )
       // console.log(answer)
       const line = answer.content
       bufferLines.push(line)
@@ -101,35 +119,48 @@ class GeminiClient {
       if (buffer.includes("[DONE]")) {
         console.log("STREAM_DONE")
         config.streamDone = true
-        saveJsonFile(`src/providers/gemini/responses/response-${requestId}.json`, bufferLines)
+        saveJsonFile(
+          `src/providers/gemini/responses/response-${requestId}.json`,
+          bufferLines
+        )
+      }
+      let content = cleanContent(parseResponseBody(line))
+      if (config.streamDone) {
+        content = config.fullContent
+      }
+      if (content && content.trim() !== "") {
+        // Clean invalid markdown code blocks from content using the dedicated function
+        const cleanedContent = cleanInvalidMarkdownCodeBlocks(content, {
+          finish_reason: config.streamDone ? "done" : null,
+        })
+        config.fullContent = content
 
-        const chunkData = {
-          content: "",
-          index: config.completionId++,
-          model: "gemini",
-          done: true,
-          finishReason: "finished",
-        }
-        const data = buildStreamChunk(chunkData)
-        yield data
-      } else {
-        const content = parseResponseBody(line)
-        if (content.length > config.lastContent.length) {
-          let streamContent = content.substr(config.lastContent.length, content.length - config.lastContent.length)
-          config.lastContent = content
-          if (streamContent.length > 0) {
-            const chunkData = {
-              content: streamContent,
-              index: config.completionId++,
-              model: "gemini",
-            }
-            const data = buildStreamChunk(chunkData)
-            yield data
-          } else {
-            // console.log({ content })
+        // Since each chunk contains the full content, we need to extract only the new part
+        if (cleanedContent.length > config.lastContent.length) {
+          config.partialContent = cleanedContent.substr(
+            config.lastContent.length,
+            cleanedContent.length - config.lastContent.length
+          )
+
+          const chunkData = {
+            content: config.partialContent,
+            index: config.completionId++,
+            model: "gemini",
           }
-          // console.log({ outputText2 })
+          yield buildStreamChunk(chunkData)
+        } else if (config.lastContent === "") {
+          config.partialContent = cleanedContent
+
+          config.fullContent = cleanedContent
+
+          const chunkData = {
+            content: config.partialContent,
+            index: config.completionId++,
+            model: "gemini",
+          }
+          yield buildStreamChunk(chunkData)
         }
+        config.lastContent = cleanedContent
       }
     }
     // }
@@ -173,7 +204,12 @@ class GeminiClient {
     await kvstore.delete(key)
     await kvstore.delete(timestampKey)
   }
-  async *fetchWithBrowserProxy(messages: any, realModel: string, thinking: boolean, chatBuffer: any) {
+  async *fetchWithBrowserProxy(
+    messages: any,
+    realModel: string,
+    thinking: boolean,
+    chatBuffer: any
+  ) {
     const tmpChatId = await this.generateTmpChatId()
     console.log({ tmpChatId })
     this.config = {
@@ -193,7 +229,10 @@ class GeminiClient {
       //   await this.unsetTempChatId()
       // }
     }
-    const { userPrompt: prompt } = await this.beforeSendCallback(this.config, messages)
+    const { userPrompt: prompt } = await this.beforeSendCallback(
+      this.config,
+      messages
+    )
 
     let data: any = { success: false }
     console.log({ messages, prompt })
@@ -211,13 +250,24 @@ class GeminiClient {
       // await unsetSocketBusy(socket.id)
       const bufferLines: any[] = []
       let assistantMessage = ""
+      function cleanContent(input) {
+        return input
+          .replace("\\*", "*")
+          .replace("\\*", "*")
+          .replace("\\`", "`")
+          .replace("\\.", ".")
+      }
       async function* getAnswer(self) {
         let streamDone = false
         let completionId = 0
         let lastContent = ""
+        let fullContent = "" // Track the full accumulated content
+        let partialContent = ""
         while (!streamDone) {
           // `answer_stream_${requestId}`
-          const answer = await self.chatHandler.waitForAnswerKey(`answer_stream_${requestId}`)
+          const answer = await self.chatHandler.waitForAnswerKey(
+            `answer_stream_${requestId}`
+          )
           // console.log(answer)
           const line = answer.content
           bufferLines.push(line)
@@ -229,38 +279,48 @@ class GeminiClient {
           if (buffer.includes("[DONE]")) {
             console.log("STREAM_DONE")
             streamDone = true
-            saveJsonFile(`src/providers/gemini/responses/response-${requestId}.json`, bufferLines)
+            saveJsonFile(
+              `src/providers/gemini/responses/response-${requestId}.json`,
+              bufferLines
+            )
+          }
+          let content = cleanContent(parseResponseBody(line))
+          if (streamDone) {
+            content = fullContent
+          }
+          if (content && content.trim() !== "") {
+            // Clean invalid markdown code blocks from content using the dedicated function
+            const cleanedContent = cleanInvalidMarkdownCodeBlocks(content, {
+              finish_reason: streamDone ? "done" : null,
+            })
+            fullContent = content
 
-            // const chunkData = {
-            //   content: "",
-            //   index: completionId++,
-            //   model: "gemini",
-            //   done: true,
-            // }
-            // yield buildStreamChunk(chunkData)
-          }
-          const content = parseResponseBody(line)
-          if (content.length > 0) {
-            chatBuffer.content += content
-          }
-          if (content.length > lastContent.length) {
-            let streamContent = content.substr(lastContent.length, content.length - lastContent.length)
-            lastContent = content
-            if (streamContent.length > 0) {
+            // Since each chunk contains the full content, we need to extract only the new part
+            if (cleanedContent.length > lastContent.length) {
+              partialContent = cleanedContent.substr(
+                lastContent.length,
+                cleanedContent.length - lastContent.length
+              )
+
               const chunkData = {
-                content: streamContent,
+                content: partialContent,
                 index: completionId++,
                 model: "gemini",
-                done: streamDone,
-                finishReason: streamDone ? "finish" : null,
               }
-              console.log(chunkData.content)
-              assistantMessage += streamContent
-
               yield buildStreamChunk(chunkData)
-            } else {
+            } else if (lastContent === "") {
+              partialContent = cleanedContent
+
+              fullContent = cleanedContent
+
+              const chunkData = {
+                content: partialContent,
+                index: completionId++,
+                model: "gemini",
+              }
+              yield buildStreamChunk(chunkData)
             }
-            console.log({ content })
+            lastContent = cleanedContent
           }
         }
         // }
@@ -273,7 +333,12 @@ class GeminiClient {
   get chat() {
     return {
       completions: {
-        create: async (params: any, requestOption: any = {}, direct = false, chatBuffer: any = { content: "" }) => {
+        create: async (
+          params: any,
+          requestOption: any = {},
+          direct = false,
+          chatBuffer: any = { content: "" }
+        ) => {
           let { model: requstModel, ...options } = params
 
           const defaultModel = "gemini"
@@ -290,9 +355,21 @@ class GeminiClient {
           // Check if response is valid before proceeding
 
           if (params.stream) {
-            return this.fetchWithBrowserProxy(options.messages, realModel, thinking, chatBuffer)
+            return this.fetchWithBrowserProxy(
+              options.messages,
+              realModel,
+              thinking,
+              chatBuffer
+            )
           }
-          return this._sendResponseFromStream(this.fetchWithBrowserProxy(options.messages, realModel, thinking, chatBuffer))
+          return this._sendResponseFromStream(
+            this.fetchWithBrowserProxy(
+              options.messages,
+              realModel,
+              thinking,
+              chatBuffer
+            )
+          )
         },
       },
     }

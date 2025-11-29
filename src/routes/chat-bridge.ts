@@ -9,6 +9,7 @@ import { streamSSE } from "hono/streaming"
 import { parseResponseBody } from "../providers/gemini/parseResponseBody"
 import { buildStreamChunk } from "../openai/buildStreamChunk"
 import { saveJsonFile } from "../global/fn/saveJsonFile"
+import { cleanInvalidMarkdownCodeBlocks } from "src/providers/gemini/cleanInvalidMarkdownCodeBlocks"
 
 const app = new Hono()
 app.get("/chat", async (c: Context) => {
@@ -69,10 +70,19 @@ app.get("/chat-stream", async (c: Context) => {
     // data = await chatHandlerAnswer.waitForAnswerKey(`answer_stream_${requestId}`)
     // await unsetSocketBusy(socket.id)
     const bufferLines: any[] = []
+    function cleanContent(input) {
+      return input
+        .replace("\\*", "*")
+        .replace("\\*", "*")
+        .replace("\\`", "`")
+        .replace("\\.", ".")
+    }
     async function* getAnswer() {
       let streamDone = false
       let completionId = 0
       let lastContent = ""
+      let fullContent = "" // Track the full accumulated content
+      let partialContent = ""
       while (!streamDone) {
         // `answer_stream_${requestId}`
         const chatHandlerAnswer: ChatAnswerHandler =
@@ -96,34 +106,44 @@ app.get("/chat-stream", async (c: Context) => {
             `src/providers/gemini/responses/response-${requestId}.json`,
             bufferLines
           )
+        }
+        let content = cleanContent(parseResponseBody(line))
+        if (streamDone) {
+          content = fullContent
+        }
+        if (content && content.trim() !== "") {
+          // Clean invalid markdown code blocks from content using the dedicated function
+          const cleanedContent = cleanInvalidMarkdownCodeBlocks(content, {
+            finish_reason: streamDone ? "done" : null,
+          })
+          fullContent = content
 
-          const chunkData = {
-            content: "",
-            index: completionId++,
-            model: "gemini",
-            done: true,
-          }
-          yield buildStreamChunk(chunkData)
-        } else {
-          const content = parseResponseBody(line)
-          if (content.length > lastContent.length) {
-            let streamContent = content.substr(
+          // Since each chunk contains the full content, we need to extract only the new part
+          if (cleanedContent.length > lastContent.length) {
+            partialContent = cleanedContent.substr(
               lastContent.length,
-              content.length - lastContent.length
+              cleanedContent.length - lastContent.length
             )
-            lastContent = content
-            if (streamContent.length > 0) {
-              const chunkData = {
-                content: streamContent,
-                index: completionId++,
-                model: "gemini",
-              }
-              yield buildStreamChunk(chunkData)
-            } else {
-              // console.log({ content })
+
+            const chunkData = {
+              content: partialContent,
+              index: completionId++,
+              model: "gemini",
             }
-            // console.log({ outputText2 })
+            yield buildStreamChunk(chunkData)
+          } else if (lastContent === "") {
+            partialContent = cleanedContent
+
+            fullContent = cleanedContent
+
+            const chunkData = {
+              content: partialContent,
+              index: completionId++,
+              model: "gemini",
+            }
+            yield buildStreamChunk(chunkData)
           }
+          lastContent = cleanedContent
         }
       }
       // }

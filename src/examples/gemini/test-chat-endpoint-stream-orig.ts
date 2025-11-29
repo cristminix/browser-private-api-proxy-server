@@ -9,7 +9,11 @@ const main = async () => {
   const prompt = process.argv[2] || "Gimme the recommended places in the world"
   // const startTime = performance.now()
   console.log("--Sending request to gemini")
-  const response = await fetch(`http://127.0.0.1:4001/api/chat-stream?platform=gemini&prompt=${encodeURIComponent(prompt)}`)
+  const response = await fetch(
+    `http://127.0.0.1:4001/api/chat-stream?platform=gemini&prompt=${encodeURIComponent(
+      prompt
+    )}`
+  )
 
   for await (const chunk of makeStreamCompletion(response, {
     sso: false,

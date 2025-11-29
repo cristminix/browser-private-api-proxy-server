@@ -1,3 +1,6 @@
+import { marked } from "marked"
+import unescapeJs from "unescape-js"
+
 export const parseResponseBody = (jsonStreamTextInput: string) => {
   // Check if it's Gemini format (contains "wrb.fr")
   // For Gemini response format
@@ -13,7 +16,7 @@ export const parseResponseBody = (jsonStreamTextInput: string) => {
 }
 export function parseResponseLine(line: any) {
   let outBuffer = null
-  if (line.trim() && !line.startsWith(")]}'") && line.includes("wrb.fr")) {
+  if (line.trim()) {
     try {
       const [parsed] = JSON.parse(line)
       // console.log({ parsed })
@@ -23,10 +26,21 @@ export function parseResponseLine(line: any) {
             const [inputJson] = JSON.parse(parsed[2])[4]
             const [idJson, contentJson] = inputJson
             const [content] = contentJson
-            // console.log({ content })
-            if (content) outBuffer = content
-            const imgRegex = /http\:\/\/googleusercontent\.com\/image_generation_content\/\d+/
-            if (content.match(imgRegex)) {
+            // console.log({
+            //   content: ,
+            // })
+            if (content)
+              outBuffer = content.replace(/\\(.)/g, (match, p1) => {
+                // match is the full match, e.g., '\<'
+                // p1 is the captured character, e.g., '<'
+                return p1
+              })
+            const imgRegex =
+              /http\:\/\/googleusercontent\.com\/image_generation_content\/\d+/
+            //http://googleusercontent.com/youtube_content/4
+            const imgYtRegex =
+              /http\:\/\/googleusercontent\.com\/youtube_content\/\d+/
+            if (content.match(imgRegex) || content.match(imgYtRegex)) {
               // console.log(JSON.stringify(inputJson, null, 2) + "\n----\n")
               const imageList = getImageData(inputJson)
               let imageStr = ""
@@ -118,12 +132,19 @@ function extractImagesFromNestedArray(arr: any): Array<{
           // Cek apakah array ini memiliki struktur seperti data gambar
           // Berdasarkan contoh imageData, data gambar memiliki struktur:
           // [null, 1, filename, url, null, encoded_data, ...]
-          if (item.length >= 4 && item[3] && typeof item[3] === "string" && (item[3].includes("googleusercontent.com") || item[3].includes("lh3.googleusercontent.com"))) {
+          if (
+            item.length >= 4 &&
+            item[3] &&
+            typeof item[3] === "string" &&
+            (item[3].includes("googleusercontent.com") ||
+              item[3].includes("lh3.googleusercontent.com"))
+          ) {
             // Ini tampaknya adalah entri gambar
             const imageDataInfo = {
               filename: typeof item[2] === "string" ? item[2] : null,
               url: typeof item[3] === "string" ? item[3] : null,
-              mimeType: item[10] && typeof item[10] === "string" ? item[10] : null,
+              mimeType:
+                item[10] && typeof item[10] === "string" ? item[10] : null,
               dimensions: Array.isArray(item[14]) ? item[14] : null, // [width, height, size]
               timestamp: Array.isArray(item[8]) ? item[8] : null,
             }
