@@ -9,11 +9,7 @@ import unescapeJs from "unescape-js"
 dotenv.config()
 // import fetch from "node:fetch"
 function cleanContent(input) {
-  return input
-    .replace("\\*", "*")
-    .replace("\\*", "*")
-    .replace("\\`", "`")
-    .replace("\\.", ".")
+  return input.replace("\\*", "*").replace("\\*", "*").replace("\\`", "`").replace("\\.", ".")
 }
 /**
  * Memodifikasi query di dalam payload string yang sudah jadi.
@@ -69,10 +65,7 @@ function modifyQueryInPayload(originalPayload, newQuery) {
 
     return newParams.toString()
   } catch (error) {
-    console.error(
-      "Gagal memodifikasi payload. Pastikan format payload benar.",
-      error
-    )
+    console.error("Gagal memodifikasi payload. Pastikan format payload benar.", error)
     return null
   }
 }
@@ -100,18 +93,18 @@ const main = async () => {
     // console.log("--Sending request to gemini")
     const modifiedPayload = modifyQueryInPayload(originalPayload, queryBaru)
 
-    let { url, body, headers } = data
-    if (body) {
-    }
+    let { url } = data
+
     const response = await fetch(`https://gemini.google.com${url}`, {
       method: "POST",
+      //@ts-ignore
       headers: {
         "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
         cookie: process.env.GEMINI_COOKIE,
       },
       body: modifiedPayload,
     })
-    console.log(JSON.stringify(headers, null, 2))
+    // console.log(JSON.stringify(headers, null, 2))
     const chunks = makeStreamCompletionOrig(response, { model: "", sso: false })
     let lastContent = ""
     let fullContent = "" // Track the full accumulated content
@@ -131,10 +124,7 @@ const main = async () => {
 
         // Since each chunk contains the full content, we need to extract only the new part
         if (cleanedContent.length > lastContent.length) {
-          partialContent = cleanedContent.substr(
-            lastContent.length,
-            cleanedContent.length - lastContent.length
-          )
+          partialContent = cleanedContent.substr(lastContent.length, cleanedContent.length - lastContent.length)
 
           process.stdout.write(partialContent)
         } else if (lastContent === "") {

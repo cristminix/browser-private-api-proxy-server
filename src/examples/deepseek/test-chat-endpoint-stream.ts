@@ -9,8 +9,7 @@ const main = async () => {
   // const startTime = performance.now()
   const response = await fetch(`http://127.0.0.1:4001/api/chat?platform=gemini&prompt=${encodeURIComponent(prompt)}`)
   let data = await response.json()
-  console.log(data)
-  process.exit()
+
   if (data.phase === "FETCH") {
     console.log("--Sending request to deepseek--")
     let { url, body, headers } = data
