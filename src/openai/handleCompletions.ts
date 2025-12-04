@@ -161,7 +161,7 @@ async function handleCompletions(chatRequest: ChatCompletionRequest, c: Context,
 
     // Default stream ke true jika tidak diset
     if (typeof chatRequest.stream !== "boolean") {
-      chatRequest.stream = true
+      chatRequest.stream = false
     }
 
     console.log(`Processing completion request for model: ${chatRequest.model}, stream: ${chatRequest.stream}`)

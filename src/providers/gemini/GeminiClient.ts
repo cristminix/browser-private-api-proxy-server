@@ -187,7 +187,7 @@ class GeminiClient {
     await kvstore.delete(key)
     await kvstore.delete(timestampKey)
   }
-  async *fetchWithBrowserProxy(messages: any, realModel: string, thinking: boolean, chatBuffer: any) {
+  async *fetchWithBrowserProxy(messages: any, realModel: string, thinking: boolean, chatBuffer: any, stream = true) {
     const tmpChatId = await this.generateTmpChatId()
     console.log({ tmpChatId })
     this.config = {
@@ -224,7 +224,7 @@ class GeminiClient {
       // data = await chatHandlerAnswer.waitForAnswerKey(`answer_stream_${requestId}`)
       // await unsetSocketBusy(socket.id)
       const bufferLines: any[] = []
-      let assistantMessage = ""
+      let originalContent = ""
       function cleanContent(input) {
         return input.replace("\\*", "*").replace("\\*", "*").replace("\\`", "`").replace("\\.", ".")
       }
@@ -249,10 +249,21 @@ class GeminiClient {
             console.log("STREAM_DONE")
             streamDone = true
             saveJsonFile(`src/providers/gemini/responses/response-${requestId}.json`, bufferLines)
+            if (!stream) {
+              const chunkData = {
+                content: originalContent,
+                index: completionId++,
+                model: "gemini",
+              }
+              yield buildStreamChunk(chunkData)
+            }
           }
           let content = cleanContent(parseResponseBody(line))
+
           if (streamDone) {
             content = fullContent
+          } else {
+            originalContent = content
           }
           if (content && content.trim() !== "") {
             // Clean invalid markdown code blocks from content using the dedicated function
@@ -271,7 +282,7 @@ class GeminiClient {
                 index: completionId++,
                 model: "gemini",
               }
-              yield buildStreamChunk(chunkData)
+              if (stream) yield buildStreamChunk(chunkData)
             } else if (lastContent === "") {
               partialContent = cleanedContent
 
@@ -282,7 +293,7 @@ class GeminiClient {
                 index: completionId++,
                 model: "gemini",
               }
-              yield buildStreamChunk(chunkData)
+              if (stream) yield buildStreamChunk(chunkData)
             }
             lastContent = cleanedContent
           }
@@ -316,13 +327,16 @@ class GeminiClient {
           if (params.stream) {
             return this.fetchWithBrowserProxy(options.messages, realModel, thinking, chatBuffer)
           }
-          return this._sendResponseFromStream(this.fetchWithBrowserProxy(options.messages, realModel, thinking, chatBuffer))
+          console.log("HERE-xxx")
+
+          return await this._sendResponseFromStream(this.fetchWithBrowserProxy(options.messages, realModel, thinking, chatBuffer, false))
         },
       },
     }
   }
 
   async _sendResponseFromStream(input: any) {
+    console.log("HERE")
     // const reader = response.body.getReader()
     let content = ""
     let chatResponse: any = {
@@ -346,7 +360,7 @@ class GeminiClient {
       }
     }
     chatResponse.choices[0].message.content = content
-    // console.log(dataPtr)
+    console.log(chatResponse)
 
     return chatResponse
   }
