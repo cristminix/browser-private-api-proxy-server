@@ -3,6 +3,7 @@ import fs from "fs/promises"
 const llmRequest = async (userMessage: string) => {
   const llmEndpoint = process.env.EXTERNAL_LLM_ENDPOINT ?? "http://127.0.0.1:6789/v1/chat/completions"
   const llmModel = process.env.EXTERNAL_LLM_MODEL ?? "qwen-portal,qwen3-coder-plus"
+  const llmApiKey = process.env.EXTERNAL_LLM_API_KEY ?? ""
   const payload = {
     stream: false,
     messages: [{ role: "user", content: userMessage }],
@@ -13,6 +14,7 @@ const llmRequest = async (userMessage: string) => {
     method: "POST",
     headers: {
       "content-type": "application/json",
+      authorization: "Bearer " + llmApiKey,
     },
     body: JSON.stringify(payload),
   })
