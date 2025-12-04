@@ -1,3 +1,5 @@
+import cuid from "cuid"
+import fs from "fs/promises"
 const llmRequest = async (userMessage: string) => {
   const llmEndpoint = process.env.EXTERNAL_LLM_ENDPOINT ?? "http://127.0.0.1:6789/v1/chat/completions"
   const llmModel = process.env.EXTERNAL_LLM_MODEL ?? "qwen-portal,qwen3-coder-plus"
@@ -19,7 +21,7 @@ const llmRequest = async (userMessage: string) => {
   return data?.choices[0]?.message?.content
 }
 
-export const compressSystemMessage = async (input: string, pattern: null | RegExp = null) => {
+export const compressSystemMessage = async (input: string, pattern: null | RegExp = null, log = false) => {
   if (pattern) {
     if (!pattern.test(input)) {
       return input
@@ -28,11 +30,17 @@ export const compressSystemMessage = async (input: string, pattern: null | RegEx
   const prompt = "Compress this system message content but keep provided example and rules :\n```markdown\n" + input + "\n```"
   let llmResponseData = await llmRequest(prompt)
   llmResponseData = llmResponseData.replace(/^```markdown/, "").replace(/```$/, "")
-
-  console.log(llmResponseData)
-  console.log({
-    originalLength: input.length,
-    newLength: llmResponseData.length,
-  })
+  if (log) {
+    console.log(llmResponseData)
+    const id = cuid()
+    try {
+      fs.writeFile(`logs/compress-input-${id}.txt`, input)
+      fs.writeFile(`logs/compress-output-${id}.txt`, llmResponseData)
+    } catch (error) {}
+    console.log({
+      originalLength: input.length,
+      newLength: llmResponseData.length,
+    })
+  }
   return llmResponseData
 }
