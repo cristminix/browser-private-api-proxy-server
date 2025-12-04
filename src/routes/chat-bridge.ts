@@ -9,7 +9,7 @@ import { streamSSE } from "hono/streaming"
 import { parseResponseBody } from "../providers/gemini/parseResponseBody"
 import { buildStreamChunk } from "../openai/buildStreamChunk"
 import { saveJsonFile } from "../global/fn/saveJsonFile"
-import { cleanInvalidMarkdownCodeBlocks } from "src/providers/gemini/cleanInvalidMarkdownCodeBlocks"
+import { cleanInvalidMarkdownCodeBlocks } from "../providers/gemini/cleanInvalidMarkdownCodeBlocks"
 
 const app = new Hono()
 app.get("/chat", async (c: Context) => {

@@ -7,7 +7,7 @@ import { setSocketBusy, unsetSocketBusy } from "../../db/msocket"
 import { Server as SocketIOServer } from "socket.io"
 import { loadChatHistory } from "../deepseek/chat-history/loadChatHistory"
 import { getUserMessages } from "../deepseek/chat-history/getUserMessages"
-import { getSystemMessages } from "../deepseek/chat-history/getSystemMessages"
+import { getSystemMessages } from "./getSystemMessages"
 import { generateUserPrompt } from "../deepseek/chat-history/generateUserPrompt"
 import { saveChatHistory } from "../deepseek/chat-history/saveChatHistory"
 import { emitSocket } from "../../global/fn/emitSocket"
@@ -63,7 +63,7 @@ class GeminiClient {
     let history = await loadChatHistory(chatHistoryDir, fileId)
     let transformedMessages = transformMessages(messages)
     let userMessages = getUserMessages(transformedMessages, history)
-    let systemMessages = getSystemMessages(transformedMessages, history)
+    let systemMessages = await getSystemMessages(transformedMessages, history)
     let userPrompt = generateUserPrompt(systemMessages, userMessages)
     // console.log({
     //   messages,
