@@ -1,5 +1,7 @@
 # Browser Private API LLM Proxy Server
 
+![Hits](https://hits.cristminix.workers.dev/browser-private-api-proxy-server.svg?action=hit&count_bg=%233DC8C0&title_bg=%23555555&title=Hits&edge_flat=false)
+
 This project provide openai compatible llm endpoint to real browser llm chat interface.
 
 This is a WebSocket Server and REST API that proxies private browser APIs via the Chrome extension.
