@@ -9,7 +9,7 @@ The server runs on port 4001 and provides both REST API endpoints and WebSocket 
 # Features
 
 - zai chat via [chat.z.ai](https://chat.z.ai) use [this chrome extension](https://github.com/cristminix/browser-private-api-proxy/releases/download/zai-deepseek/zai-deepseek.zip)
-- deepseek chat via [chat.z.ai](https://chat.deepseek.com) use [this chrome extension](https://github.com/cristminix/browser-private-api-proxy/releases/download/zai-deepseek/zai-deepseek.zip)
+- deepseek chat via [chat.deepseek.com](https://chat.deepseek.com) use [this chrome extension](https://github.com/cristminix/browser-private-api-proxy/releases/download/zai-deepseek/zai-deepseek.zip)
 - gemini chat via [gemini.google.com](https://gemini.google.com) use [this extension](https://github.com/cristminix/browser-private-api-proxy/releases/download/zai-deepseek/gemini.zip)
 
 # Limitation
