@@ -166,7 +166,7 @@ class DeepsSeekClient {
         /**
        web_search: false,
     auto_web_search: false,
-       * 
+       *
       */
         // console.log(jsonBody)
         // jsonBody.messages = transformedMessages //[{ role: "system", content: "Jawab singkat saja" }, ...jsonBody.messages]
@@ -180,7 +180,9 @@ class DeepsSeekClient {
         headers: { ...headers },
         body,
       })
-      await emitSocket(this.io, "deepseek-proxy", "chat-reload", {
+      const ENABLE_RELOAD = process.env.DEEPSEEK_ENABLE_RELOAD_AFTER_COMPLETIONS ?? "true"
+      if (ENABLE_RELOAD === "true") {
+        await emitSocket(this.io, "deepseek-proxy", "chat-reload", {
         chatId: jsonBody.chat_session_id,
         requestId: cuid(),
       })
