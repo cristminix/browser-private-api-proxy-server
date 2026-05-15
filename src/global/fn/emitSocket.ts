@@ -9,10 +9,11 @@ const emitSocket = async (io: SocketIOServer, targetAppName: string, eventName: 
   let retryCount = 0
   let maxRetryCount = 5
   let delayRetry = 1000
+  console.log("emit", targetAppName)
   while (retryCount <= maxRetryCount) {
     try {
       const connectionIds = await getSocketConnectionIds()
-
+      console.log({ connectionIds })
       if (!connectionIds || connectionIds.length === 0) {
         console.warn("No active socket connections found")
       }
@@ -22,6 +23,7 @@ const emitSocket = async (io: SocketIOServer, targetAppName: string, eventName: 
           const appName = await getSocketAppName(socketId)
           console.log({ socketId, appName })
           if (appName === targetAppName) {
+            console.log(`sending ${eventName} to ${socketId}`)
             const socketBusy = await getSocketBusy(socketId)
             console.log({ socketId, socketBusy })
             if (socketBusy) {

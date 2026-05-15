@@ -153,7 +153,7 @@ class DeepsSeekClient {
       await unsetSocketBusy(socket.id)
     }
     let jsonBody: any = {}
-    // console.log(data.phase)
+    console.log(data.phase)
     if (data.phase === "FETCH") {
       console.log("--Sending request to deepseek--")
       let { url, body, headers } = data
@@ -180,6 +180,7 @@ class DeepsSeekClient {
         headers: { ...headers },
         body,
       })
+      // console.log("here")
       await emitSocket(this.io, "deepseek-proxy", "chat-reload", {
         chatId: jsonBody.chat_session_id,
         requestId: cuid(),
@@ -332,6 +333,7 @@ class DeepsSeekClient {
             usage,
             done: true,
           })
+          console.log({ finalChunk })
           if (sso) {
             yield encoder.encode(`data: ${JSON.stringify(finalChunk)}\n\ndata: [DONE]\n\n`)
           } else {
@@ -433,7 +435,9 @@ class DeepsSeekClient {
   }
 
   convertToOpenaiTextStream(jsonData: any, model: string, completionId: number, report: any = {}) {
-    const { v: inputData } = jsonData
+    const { v: inputData, o: oo, p: ip } = jsonData
+    if (ip === "response/status" && oo === "SET" && inputData === "FINISHED") return null
+
     let content = ""
     let done = false
 
@@ -467,9 +471,15 @@ class DeepsSeekClient {
         }
       }
     }
-    if (typeof inputData === "object") {
+
+    if (typeof inputData === "object" && !Array.isArray(inputData)) {
       const { response } = inputData
-      if (response) {
+      if (response && response.fragments) {
+        for (const fragment of response.fragments) {
+          if (fragment.type === "RESPONSE" && fragment.content) {
+            content = (content || "") + fragment.content
+          }
+        }
       }
     }
     // const { done, delta_content: text, edit_content: textEdit } = inputData

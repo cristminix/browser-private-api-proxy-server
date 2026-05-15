@@ -117,7 +117,7 @@ async function processStream(
     print: boolean
     onData?: (chunk: any) => void
     onDone?: (usage: UsageData) => void
-  }
+  },
 ): Promise<void> {
   const reader = response.body!.getReader()
   const decoder = new TextDecoder()
@@ -155,7 +155,7 @@ async function* processStreamWithYield(
     print: boolean
     onData?: (chunk: any) => void
     onDone?: (usage: UsageData) => void
-  }
+  },
 ): AsyncGenerator<any, void, unknown> {
   const reader = response.body!.getReader()
   const decoder = new TextDecoder()
@@ -191,7 +191,7 @@ function handleStreamCompletion(
     model: string
     onData?: (chunk: any) => void
     onDone?: (usage: UsageData) => void
-  }
+  },
 ): void {
   const { sso, model, onData, onDone } = options
 
@@ -238,7 +238,7 @@ async function processBufferLines(
     model: string
     print: boolean
     onData?: (chunk: any) => void
-  }
+  },
 ): Promise<void> {
   // Split buffer by newlines and process each part
   const lines = state.buffer.split("\n")
@@ -263,7 +263,7 @@ async function* processBufferLinesWithYield(
     model: string
     print: boolean
     onData?: (chunk: any) => void
-  }
+  },
 ): AsyncGenerator<any, void, unknown> {
   // Split buffer by newlines and process each part
   const lines = state.buffer.split("\n")
@@ -292,7 +292,7 @@ async function processLine(
     model: string
     print: boolean
     onData?: (chunk: any) => void
-  }
+  },
 ): Promise<void> {
   const { sso, model, print, onData } = options
 
@@ -340,7 +340,7 @@ async function processLineWithYield(
     model: string
     print: boolean
     onData?: (chunk: any) => void
-  }
+  },
 ): Promise<any> {
   const { sso, model, print, onData } = options
 
@@ -393,7 +393,7 @@ async function processChatCompletion(
     model: string
     print: boolean
     onData?: (chunk: any) => void
-  }
+  },
 ): Promise<void> {
   const { model, print, onData } = options
   const { data } = jsonData
@@ -446,7 +446,7 @@ async function processChatCompletionWithYield(
     model: string
     print: boolean
     onData?: (chunk: any) => void
-  }
+  },
 ): Promise<any> {
   const { model, print, onData } = options
   const { data } = jsonData
@@ -495,7 +495,20 @@ async function processChatCompletionWithYield(
  * Convert stream data to OpenAI-compatible format
  */
 export function convertToOpenaiTextStream(jsonData: any, model: string, completionId: number): any | null {
-  const { v: inputData } = jsonData
+  const { v: inputData, p: ip, o: oo } = jsonData
+  if (ip === 'response/status' && oo === 'SET' && inputData === 'FINISHED') return null
+  // console.log(jsonData)
+  /*
+  {"v":{
+    "response":{
+    "message_id":8,"parent_id":7,"model":"","role":"ASSISTANT",
+    "thinking_enabled":false,"ban_edit":false,"ban_regenerate":false,
+    "status":"WIP","incomplete_message":null,
+    "accumulated_token_usage":0,"feedback":null,"inserted_at":1778875859.768225,"search_enabled":true,
+    "fragments":[{"id":2,"type":"RESPONSE","content":"H","references":[],"stage_id":1}],
+    "conversation_mode":"DEFAULT","has_pending_fragment":false,"auto_continue":false}}}
+  */
+  //
   let content, done
   if (typeof inputData === "string") {
     content = inputData
@@ -510,7 +523,7 @@ export function convertToOpenaiTextStream(jsonData: any, model: string, completi
             }
           }
           if (p) {
-            console.log("here", p)
+            // console.log("here", p)
             if (p === "accumulated_token_usage") {
             } else if (p === "status") {
             } else if (p === "FINISHED") {
@@ -529,14 +542,22 @@ export function convertToOpenaiTextStream(jsonData: any, model: string, completi
       }
     }
   }
-  if (typeof inputData === "object") {
+  if (typeof inputData === "object" && !Array.isArray(inputData)) {
     const { response } = inputData
-    if (response) {
+    if (response && response.fragments) {
+      for (const fragment of response.fragments) {
+        if (fragment.type === "RESPONSE" && fragment.content) {
+          content = (content || "") + fragment.content
+        }
+      }
     }
   }
   // const { done, delta_content: text, edit_content: textEdit } = inputData
 
   if (content) {
+    if (content.match(/FINISHED/)) {
+      console.log({ jsonData })
+    }
     return buildStreamChunk({
       model,
       index: completionId,

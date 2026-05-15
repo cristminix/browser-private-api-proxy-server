@@ -12,18 +12,18 @@ This project is a WebSocket Server and REST API for proxying private browser API
 
 ### Prerequisites
 - Node.js (v18 or higher)
-- pnpm package manager
+- yarn package manager
 
 ### Installation
 1. Clone the repository
-2. Install dependencies: `pnpm install`
-3. Start the development server: `pnpm run dev`
+2. Install dependencies: `yarn install`
+3. Start the development server: `yarn run dev`
 
 ### Development Commands
 
-- `pnpm run dev` – Start the development server with auto-reload on code changes (using tsx watch)
-- `pnpm run build` – Compile TypeScript to JavaScript (outputs to `dist/` folder)
-- `pnpm run start` – Start the production server (expects built files in `dist/`)
+- `yarn run dev` – Start the development server with auto-reload on code changes (using tsx watch)
+- `yarn run build` – Compile TypeScript to JavaScript (outputs to `dist/` folder)
+- `yarn run start` – Start the production server (expects built files in `dist/`)
 
 ## Project Structure
 
@@ -64,6 +64,6 @@ This project is a WebSocket Server and REST API for proxying private browser API
 ## Development Workflow
 
 1. Make changes to TypeScript files in the `src/` directory
-2. Run `pnpm run dev` to start the development server with hot-reload
-3. For production builds, run `pnpm run build` and then `pnpm run start`
+2. Run `yarn run dev` to start the development server with hot-reload
+3. For production builds, run `yarn run build` and then `yarn run start`
 4. Follow the code style guidelines to maintain consistency
