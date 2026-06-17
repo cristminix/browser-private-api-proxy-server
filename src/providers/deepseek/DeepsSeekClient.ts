@@ -139,7 +139,7 @@ class DeepsSeekClient {
     const { userPrompt: prompt } = await this.beforeSendCallback(this.config, messages)
 
     let data: any = { success: false }
-    // console.log({ messages, prompt })
+    console.log({  prompt })
     // return
     const requestId = cuid()
     const socket = await emitDeepSeekSocket(this.io, "chat", {
@@ -180,7 +180,7 @@ class DeepsSeekClient {
         headers: { ...headers },
         body,
       })
-      // console.log("here")
+      console.log("here chat-reload")
       await emitSocket(this.io, "deepseek-proxy", "chat-reload", {
         chatId: jsonBody.chat_session_id,
         requestId: cuid(),
@@ -300,6 +300,7 @@ class DeepsSeekClient {
     let buffer = ""
     let completionId = 1
     // let responseLines: any[] = []
+    let isThinking = false
     try {
       // Process the stream until completion
       let streamCompleted = false
@@ -333,7 +334,7 @@ class DeepsSeekClient {
             usage,
             done: true,
           })
-          console.log({ finalChunk })
+          // console.log({ finalChunk })
           if (sso) {
             yield encoder.encode(`data: ${JSON.stringify(finalChunk)}\n\ndata: [DONE]\n\n`)
           } else {
@@ -362,7 +363,7 @@ class DeepsSeekClient {
           try {
             // Process only data lines
             if (line.startsWith("data: ")) {
-              // console.log(line)
+              console.log(line)
               // Extract JSON string after "data: "
               const jsonString = line.slice(6)
               // console.log(jsonString)
@@ -392,7 +393,15 @@ class DeepsSeekClient {
               if (usageData && usageData.accumulated_token_usage !== undefined) {
                 calculatedUsage = usageData
               }
-              const result = this.convertToOpenaiTextStream(jsonData, model, completionId, {})
+
+              // Detect thinking phase
+              if (jsonData.v?.response?.fragments?.[0]?.type) {
+                isThinking = jsonData.v.response.fragments[0].type === "THINK"
+              } else if (jsonData.p === "response/fragments" && Array.isArray(jsonData.v) && jsonData.v[0]?.type) {
+                isThinking = jsonData.v[0].type === "THINK"
+              }
+
+              const result = this.convertToOpenaiTextStream(jsonData, model, completionId, isThinking, {})
               if (result) {
                 // console.log(result)
                 if (chatBuffer) {
@@ -434,7 +443,8 @@ class DeepsSeekClient {
     }
   }
 
-  convertToOpenaiTextStream(jsonData: any, model: string, completionId: number, report: any = {}) {
+  convertToOpenaiTextStream(jsonData: any, model: string, completionId: number, isThinking: boolean, report: any = {}) {
+    // console.log({jsonData})
     const { v: inputData, o: oo, p: ip } = jsonData
     if (ip === "response/status" && oo === "SET" && inputData === "FINISHED") return null
 
@@ -461,10 +471,8 @@ class DeepsSeekClient {
           } else if (Array.isArray(nextData)) {
             for (const subItem of nextData) {
               const { type, content: text } = subItem
-              if (text && type === "RESPONSE") {
+              if (text && (type === "RESPONSE" || type === "THINK")) {
                 content = text
-              } else {
-                // console.log("here-xxx")
               }
             }
           }
@@ -476,7 +484,7 @@ class DeepsSeekClient {
       const { response } = inputData
       if (response && response.fragments) {
         for (const fragment of response.fragments) {
-          if (fragment.type === "RESPONSE" && fragment.content) {
+          if ((fragment.type === "RESPONSE" || fragment.type === "THINK") && fragment.content) {
             content = (content || "") + fragment.content
           }
         }
@@ -489,7 +497,7 @@ class DeepsSeekClient {
         model,
         index: completionId,
         finishReason: done ? "finish" : null,
-        content,
+        ...(isThinking ? { content: "", reasoningContent: content } : { content }),
       })
     }
 

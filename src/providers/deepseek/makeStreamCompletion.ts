@@ -557,6 +557,7 @@ export function convertToOpenaiTextStream(jsonData: any, model: string, completi
   if (content) {
     if (content.match(/FINISHED/)) {
       console.log({ jsonData })
+      return null
     }
     return buildStreamChunk({
       model,

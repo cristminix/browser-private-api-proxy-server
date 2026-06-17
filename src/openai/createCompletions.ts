@@ -2,11 +2,7 @@ import { ChatCompletionRequest } from "./types/chat"
 import ZaiProvider from "../providers/zai/ZaiProvider"
 import DeepsSeekProvider from "../providers/deepseek/DeepsSeekProvider"
 import GeminiProvider from "../providers/gemini/GeminiProvider"
-async function createCompletions(
-  chatRequest: ChatCompletionRequest,
-  io: any,
-  chatHandler: any
-) {
+async function createCompletions(chatRequest: ChatCompletionRequest, io: any, chatHandler: any) {
   let requestModel = chatRequest.model
   let providerApi
   if (requestModel === "zai") {
@@ -15,6 +11,8 @@ async function createCompletions(
     providerApi = new DeepsSeekProvider(io, chatHandler)
   } else if (requestModel === "gemini") {
     providerApi = new GeminiProvider(io, chatHandler)
+  } else {
+    providerApi = new DeepsSeekProvider(io, chatHandler)
   }
   //@ts-ignore
   // const messages = await getChatRequestMessages(chatRequest, providerApi)
@@ -25,9 +23,7 @@ async function createCompletions(
 
   console.log("realModel", realModel)
   //@ts-ignore
-  return streaming
-    ? providerApi.stream(chatRequest)
-    : providerApi.create(chatRequest)
+  return streaming ? providerApi.stream(chatRequest) : providerApi.create(chatRequest)
 }
 
 export default createCompletions

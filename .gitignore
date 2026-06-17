@@ -39,3 +39,4 @@ src/examples/chat-history/
 response-*.json
 src/providers/deepseek/responses/
 logs/
+.aider*

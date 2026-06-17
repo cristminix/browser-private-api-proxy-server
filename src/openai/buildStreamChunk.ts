@@ -13,7 +13,8 @@
 export function buildStreamChunk(options: {
   model: string
   index: number
-  content: string
+  content?: string
+  reasoningContent?: string
   finishReason?: string | null
   usage?: any
   done?: boolean
@@ -21,7 +22,8 @@ export function buildStreamChunk(options: {
   const {
     model,
     index,
-    content,
+    content = "",
+    reasoningContent,
     finishReason = null,
     usage,
     done = false,
@@ -41,6 +43,10 @@ export function buildStreamChunk(options: {
         },
       },
     ],
+  }
+
+  if (reasoningContent !== undefined) {
+    chunk.choices[0].delta.reasoning_content = reasoningContent
   }
 
   // Add usage if provided
