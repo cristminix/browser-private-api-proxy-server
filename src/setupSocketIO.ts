@@ -41,6 +41,15 @@ export function setupSocketIO(server: HttpServer, chatHandlerAnswer: ChatAnswerH
 
   // Socket.IO connection handling
   io.on("connection", (socket: Socket) => {
+    // 1. Browser memberi tahu siapa dirinya (misal: user_123)
+  const userId = socket.handshake.query.userId; 
+  if(userId){
+  // 2. Masukkan socket baru ini ke dalam room khusus user tersebut
+  socket.join(userId);
+  console.log(`User ${userId} terhubung dengan socket baru: ${socket.id}`);
+
+}
+
     console.log("New Socket.IO client connected:", socket.id)
     updateSocketConnectionIds(socket.id, "in")
 

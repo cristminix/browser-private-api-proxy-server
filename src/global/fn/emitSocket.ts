@@ -1,63 +1,95 @@
-import { Socket } from "socket.io"
-import { Server as SocketIOServer } from "socket.io"
+import { Socket } from "socket.io";
+import { Server as SocketIOServer } from "socket.io";
 
-import { getSocketAppName, getSocketBusy, getSocketConnectionIds } from "../../db/msocket"
-import { getSocketById } from "./getSocketById"
-import { delay } from "./delay"
+import {
+  getSocketAppName,
+  getSocketBusy,
+  getSocketConnectionIds,
+} from "../../db/msocket";
+import { getSocketById } from "./getSocketById";
+import { delay } from "./delay";
 
-const emitSocket = async (io: SocketIOServer, targetAppName: string, eventName: string, data: unknown): Promise<Socket | null> => {
-  let retryCount = 0
-  let maxRetryCount = 5
-  let delayRetry = 1000
-  console.log("emit", targetAppName)
+const emitSocket = async (
+  io: SocketIOServer,
+  targetAppName: string,
+  eventName: string,
+  data: unknown,
+): Promise<Socket | null> => {
+  let retryCount = 0;
+  let maxRetryCount = 5;
+  let delayRetry = 1000;
+  console.log("emit", targetAppName);
   while (retryCount <= maxRetryCount) {
-    try {
-      const connectionIds = await getSocketConnectionIds()
-      console.log({ connectionIds })
-      if (!connectionIds || connectionIds.length === 0) {
-        console.warn("No active socket connections found")
-      }
-
-      for (const socketId of connectionIds) {
-        try {
-          const appName = await getSocketAppName(socketId)
-          console.log({ socketId, appName })
-          if (appName === targetAppName) {
-            console.log(`sending ${eventName} to ${socketId}`)
-            const socketBusy = await getSocketBusy(socketId)
-            console.log({ socketId, socketBusy })
-            if (socketBusy) {
-              continue
-            }
-            const socket = getSocketById(io, socketId)
-
-            if (socket) {
-              socket.emit(eventName, data)
-              return socket
-            }
+    if (targetAppName.includes("deepseek")) {
+      try {
+        const roomSockets = io.sockets.adapter.rooms.get("user_123");
+        const socketId = roomSockets && roomSockets.size > 0 ? Array.from(roomSockets)[0] : null;
+        if (socketId) {
+          const socket = getSocketById(io, socketId);
+          if (socket) {
+            socket.emit(eventName, data);
+            return socket;
           }
-        } catch (error) {
-          console.error(`Error processing socket ${socketId}:`, error)
         }
+      } catch (error) {
+        console.error(`Error processing socket user_123:`, error);
       }
+    } else {
+      try {
+        const connectionIds = await getSocketConnectionIds();
+        console.log({ connectionIds });
+        if (!connectionIds || connectionIds.length === 0) {
+          console.warn("No active socket connections found");
+        }
 
-      console.warn(`No ${targetAppName} socket found among active connections`)
-    } catch (error) {
-      console.error("Error in emitSocket:", error)
+        for (const socketId of connectionIds) {
+          try {
+            const appName = await getSocketAppName(socketId);
+            console.log({ socketId, appName });
+            if (appName === targetAppName) {
+              console.log(`sending ${eventName} to ${socketId}`);
+              const socketBusy = await getSocketBusy(socketId);
+              console.log({ socketId, socketBusy });
+              if (socketBusy) {
+                continue;
+              }
+              const socket = getSocketById(io, socketId);
+
+              if (socket) {
+                socket.emit(eventName, data);
+                return socket;
+              }
+            }
+          } catch (error) {
+            console.error(`Error processing socket ${socketId}:`, error);
+          }
+        }
+
+        console.warn(
+          `No ${targetAppName} socket found among active connections`,
+        );
+      } catch (error) {
+        console.error("Error in emitSocket:", error);
+      }
     }
+
     // Hanya retry jika bukan iterasi terakhir
     if (retryCount < maxRetryCount) {
-      console.log(`Retry ${retryCount + 1}/${maxRetryCount + 1} in ${delayRetry}ms`)
-      await delay(delayRetry)
-      retryCount += 1
-      delayRetry += 1000
+      console.log(
+        `Retry ${retryCount + 1}/${maxRetryCount + 1} in ${delayRetry}ms`,
+      );
+      await delay(delayRetry);
+      retryCount += 1;
+      delayRetry += 1000;
     } else {
-      break // Keluar dari loop jika sudah mencapai maksimal retry
+      break; // Keluar dari loop jika sudah mencapai maksimal retry
     }
   }
 
-  console.warn(`No ${targetAppName} socket found after ${maxRetryCount + 1} attempts`)
-  return null
-}
+  console.warn(
+    `No ${targetAppName} socket found after ${maxRetryCount + 1} attempts`,
+  );
+  return null;
+};
 
-export { emitSocket }
+export { emitSocket };
